@@ -144,22 +144,23 @@ class _CoronaMapsState extends State<CoronaMaps> {
 
     info = data.map((res) => Results.fromJson(res)).toList();
     //print(info);
+    setState(() {
+      loading = false;
+      showReloadMsg = false;
+    });
 
     for (int i = 0; i < info.length; i++) {
       _generateMapData(i);
     }
 
     print(markers.length);
-    setState(() {
-      loading = false;
-      showReloadMsg = false;
-    });
+
     print(placemark[0].position.latitude);
   }
 
   _generateMapData(int i) async {
-    List<Placemark> pm =
-        await Geolocator().placemarkFromAddress("${info[i].country}");
+    List<Placemark> pm = await Geolocator().placemarkFromAddress(
+        "${info[i].country == 'S. Korea' ? info[i].country.split('S. ')[1] : info[i].country}");
     markers.add(
       Marker(
           markerId: MarkerId(info[i].country),
