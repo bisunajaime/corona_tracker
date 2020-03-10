@@ -1,12 +1,10 @@
 import 'dart:async';
 
-import 'package:coronatracker/statistics.dart';
+import 'package:coronatracker/corona_maps.dart';
 import 'package:flutter/material.dart';
+import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
-import 'package:html/dom.dart' as dom;
-import 'dart:convert';
-import 'package:xpath/xpath.dart';
 
 void main() => runApp(MyApp());
 
@@ -15,6 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Corona Tracker',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -190,10 +189,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             MaterialButton(
               onPressed: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => Statistics())),
+                  MaterialPageRoute(builder: (context) => CoronaMaps())),
               child: ListTile(
-                leading: Icon(Icons.bubble_chart),
-                title: Text('Statistics'),
+                leading: Icon(Icons.location_on),
+                title: Text('Corona Maps'),
               ),
             )
           ],
