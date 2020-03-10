@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:coronatracker/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
@@ -40,10 +42,13 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Results> info = [];
 
   bool loading = true;
+  bool showReloadMsg = false;
 
   Future getCountries() async {
     setState(() {
+      // clear when reload
       loading = true;
+      showReloadMsg = false;
       info.clear();
       data.clear();
       countriesList.clear();
@@ -54,8 +59,11 @@ class _MyHomePageState extends State<MyHomePage> {
       newCasesList.clear();
     });
 
-    // clear when reload
-
+    Timer(Duration(seconds: 3), () {
+      setState(() {
+        showReloadMsg = true;
+      });
+    });
     // fetch data
     http.Client client = http.Client();
     http.Response response =
@@ -139,6 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     setState(() {
       loading = false;
+      showReloadMsg = false;
     });
   }
 
@@ -202,7 +211,24 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: loading
           ? Center(
-              child: CircularProgressIndicator(),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  CircularProgressIndicator(),
+                  SizedBox(
+                    height: 10.0,
+                  ),
+                  Text(
+                    'Loading... \n ${showReloadMsg ? '\nLooks like its taking a while...\n try reloading again!' : ''}',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12.0,
+                    ),
+                  )
+                ],
+              ),
             )
           : ListView.builder(
               itemCount: info.length,
