@@ -32,113 +32,60 @@ class _CoronaMapsState extends State<CoronaMaps> {
   LatLng tappedPos;
   double tapZoom = 4.0;
 
-  bool loading = true;
+  bool loading = false;
   bool displayData = false;
   Timer load;
   int counter = 0;
+  GoogleMapController _mapController;
 
-  int _start = 5;
-  int _current = 5;
+  getMarkers(Results data) async {
+    List<Placemark> placemarks = await Geolocator().placemarkFromAddress(
+        '${data.country == 'S. Korea' ? data.country.replaceAll('S. ', '') : data.country}');
 
-  Future getCountries() async {
-    List<Results> data = widget.resultData;
+    Placemark thePlacemark = placemarks[0];
 
-    // for loop to add placemarkers
-    Timer.run(() {
-      setState(() {
-        loading = true;
-      });
-    });
-
-    load = Timer.periodic(Duration(seconds: 5), (d) {
-      for (int i = 0; i < widget.resultData.length; i++) {
-        _addPlacemarkers(i);
-      }
-      setState(() {
-        counter++;
-        loading = false;
-      });
-      print('refresh');
-    });
-  }
-
-  _addPlacemarkers(int i) async {
-    List<Placemark> pm = await Geolocator()
-        .placemarkFromAddress(
-            '${widget.resultData[i].country == 'S. Korea' ? widget.resultData[i].country.split('S. ')[1] : widget.resultData[i].country}')
-        .catchError((onError) {
-      print('Err');
-    });
-    print('loading Data');
     Marker theMarker = Marker(
-      markerId: MarkerId(widget.resultData[i].country),
+      markerId: MarkerId(data.country),
       position: LatLng(
-        pm[0].position.latitude,
-        pm[0].position.longitude,
-      ),
+          thePlacemark.position.latitude, thePlacemark.position.longitude),
       consumeTapEvents: true,
-      infoWindow: InfoWindow(
-        onTap: () {
-          print('Test');
-        },
-        title: 'Test',
-      ),
       onTap: () {
+        print('tap');
         setState(() {
-          tappedText = widget.resultData[i];
+          tappedPos = LatLng(
+              thePlacemark.position.latitude, thePlacemark.position.longitude);
+          tappedText = data;
         });
-        _mapController.animateCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(
-              target: LatLng(
-                pm[0].position.latitude,
-                pm[0].position.longitude,
-              ),
-              zoom: tapZoom,
+        _mapController.animateCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(
+            zoom: tapZoom,
+            target: LatLng(
+              thePlacemark.position.latitude,
+              thePlacemark.position.longitude,
             ),
           ),
-        );
+        ));
       },
     );
     setState(() {
-      newMarkers[MarkerId(widget.resultData[i].country)] = theMarker;
+      newMarkers[MarkerId(data.country)] = theMarker;
     });
-    print(newMarkers[MarkerId(widget.resultData[i].country)].markerId);
-//    markers.add(
-//      Marker(
-//        markerId: MarkerId(widget.resultData[i].country),
-//        position: LatLng(
-//          pm[0].position.latitude,
-//          pm[0].position.longitude,
-//        ),
-//        consumeTapEvents: true,
-//        infoWindow: InfoWindow(
-//          onTap: () {
-//            print('Test');
-//          },
-//          title: 'Test',
-//        ),
-//        onTap: () {
-//          setState(() {
-//            tappedText = widget.resultData[i];
-//          });
-//          _mapController.animateCamera(
-//            CameraUpdate.newCameraPosition(
-//              CameraPosition(
-//                target: LatLng(
-//                  pm[0].position.latitude,
-//                  pm[0].position.longitude,
-//                ),
-//                zoom: tapZoom,
-//              ),
-//            ),
-//          );
-//        },
-//      ),
-//    );
   }
 
-  GoogleMapController _mapController;
+  Future loadData() async {
+    print('hello');
+    setState(() {
+      loading = true;
+    });
+    load = Timer.periodic(Duration(seconds: 3), (d) {
+      setState(() {
+        loading = false;
+      });
+      d.cancel();
+    });
+    List x = widget.resultData.map((data) => getMarkers(data)).toList();
+    print(newMarkers.length);
+  }
 
   @override
   void initState() {
@@ -147,15 +94,16 @@ class _CoronaMapsState extends State<CoronaMaps> {
     rootBundle.loadString('assets/maps/dark_maps.txt').then((string) {
       mapStyle = string;
     });
-    getCountries();
     setState(() {
-      loading = false;
+      loading = true;
     });
+    loadData();
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
+    load.cancel();
     super.dispose();
   }
 
@@ -163,6 +111,15 @@ class _CoronaMapsState extends State<CoronaMaps> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              print('pressed');
+              loadData();
+            },
+          )
+        ],
         backgroundColor: Color(0xff1d2c4d),
         title: Column(
           children: <Widget>[
@@ -179,7 +136,7 @@ class _CoronaMapsState extends State<CoronaMaps> {
               ),
             ),
             Text(
-              'Refreshing every 10 seconds',
+              'Takes a while to load the map',
               style: TextStyle(
                 fontSize: 13.0,
                 color: Colors.greenAccent,
@@ -187,12 +144,6 @@ class _CoronaMapsState extends State<CoronaMaps> {
             ),
           ],
         ),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: getCountries,
-          )
-        ],
       ),
       body: Container(
         height: MediaQuery.of(context).size.height,
@@ -214,15 +165,16 @@ class _CoronaMapsState extends State<CoronaMaps> {
                         _mapController.setMapStyle(mapStyle);
                       },
                       initialCameraPosition:
-                          CameraPosition(target: LatLng(16, 180)),
-                      markers: Set<Marker>.of(newMarkers.values),
+                          CameraPosition(target: LatLng(12, 121)),
                       myLocationButtonEnabled: false,
                       myLocationEnabled: true,
+                      markers: Set<Marker>.of(newMarkers.values),
                       onCameraMove: (CameraPosition pos) {
                         setState(() {
                           tapZoom = pos.zoom;
                         });
                       },
+                      onCameraIdle: () {},
                     ),
                   ),
                   Container(

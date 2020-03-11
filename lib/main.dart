@@ -43,6 +43,8 @@ class _MyHomePageState extends State<MyHomePage> {
   bool loading = true;
   bool showReloadMsg = false;
 
+  Timer getMarkers;
+
   Future getCountries() async {
     setState(() {
       // clear when reload
@@ -142,7 +144,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     info = data.map((res) => Results.fromJson(res)).toList();
-    print(info);
 
     setState(() {
       loading = false;
@@ -153,9 +154,9 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     // TODO: implement initState
+    getCountries();
     super.initState();
     //initiate();
-    getCountries();
   }
 
   @override
@@ -210,7 +211,10 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.refresh),
-            onPressed: getCountries,
+            onPressed: () {
+              getCountries();
+              getMarkers.cancel();
+            },
           )
         ],
       ),
