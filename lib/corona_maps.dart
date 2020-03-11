@@ -22,7 +22,7 @@ class _CoronaMapsState extends State<CoronaMaps> {
   // new markers
   Map<MarkerId, Marker> newMarkers = <MarkerId, Marker>{};
   Results tappedText = Results(
-    country: 'Nothing',
+    country: 'Select a Marker',
     newCases: '0',
     newDeaths: '0',
     totalCases: '0',
@@ -39,37 +39,47 @@ class _CoronaMapsState extends State<CoronaMaps> {
   GoogleMapController _mapController;
 
   getMarkers(Results data) async {
-    List<Placemark> placemarks = await Geolocator().placemarkFromAddress(
-        '${data.country == 'S. Korea' ? data.country.replaceAll('S. ', '') : data.country}');
-
-    Placemark thePlacemark = placemarks[0];
-
-    Marker theMarker = Marker(
-      markerId: MarkerId(data.country),
-      position: LatLng(
-          thePlacemark.position.latitude, thePlacemark.position.longitude),
-      consumeTapEvents: true,
-      onTap: () {
-        print('tap');
-        setState(() {
-          tappedPos = LatLng(
-              thePlacemark.position.latitude, thePlacemark.position.longitude);
-          tappedText = data;
-        });
-        _mapController.animateCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(
-            zoom: tapZoom,
-            target: LatLng(
-              thePlacemark.position.latitude,
-              thePlacemark.position.longitude,
+    try {
+      List<Placemark> placemarks = await Geolocator().placemarkFromAddress(
+          '${data.country == 'S. Korea' ? data.country.replaceAll('S. ', '') : data.country}');
+      Placemark thePlacemark = placemarks[0];
+      Marker theMarker = Marker(
+        markerId: MarkerId(data.country),
+        position: LatLng(
+            thePlacemark.position.latitude, thePlacemark.position.longitude),
+        consumeTapEvents: true,
+        infoWindow: InfoWindow(
+          title: data.country,
+          snippet: data.totalCases,
+          onTap: () {
+            print('tapped');
+          },
+        ),
+        onTap: () {
+          print('tap');
+          setState(() {
+            tappedPos = LatLng(thePlacemark.position.latitude,
+                thePlacemark.position.longitude);
+            tappedText = data;
+          });
+          _mapController.animateCamera(CameraUpdate.newCameraPosition(
+            CameraPosition(
+              zoom: tapZoom,
+              target: LatLng(
+                thePlacemark.position.latitude,
+                thePlacemark.position.longitude,
+              ),
             ),
-          ),
-        ));
-      },
-    );
-    setState(() {
-      newMarkers[MarkerId(data.country)] = theMarker;
-    });
+          ));
+        },
+      );
+
+      setState(() {
+        newMarkers[MarkerId(data.country)] = theMarker;
+      });
+    } catch (e) {
+      print("$e: ERROR getting data ${data.country}");
+    }
   }
 
   Future loadData() async {
@@ -121,7 +131,9 @@ class _CoronaMapsState extends State<CoronaMaps> {
           )
         ],
         backgroundColor: Color(0xff1d2c4d),
+        centerTitle: true,
         title: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Text(
               'Current Cases: ${widget.resultData.length}',
@@ -159,6 +171,7 @@ class _CoronaMapsState extends State<CoronaMaps> {
             : Column(
                 children: <Widget>[
                   Expanded(
+                    flex: 2,
                     child: GoogleMap(
                       onMapCreated: (GoogleMapController controller) {
                         _mapController = controller;
@@ -177,165 +190,155 @@ class _CoronaMapsState extends State<CoronaMaps> {
                       onCameraIdle: () {},
                     ),
                   ),
-                  Container(
-                    height: 140,
-                    width: double.infinity,
-                    color: Colors.white,
-                    margin: EdgeInsets.symmetric(
-                      vertical: 0.0,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: <Widget>[
-                              Expanded(
-                                child: Container(
-                                  color: Color(0xff1d2c4d),
-                                  child: Center(
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      width: double.infinity,
+                      color: Color(0xff1d2c4d),
+                      margin: EdgeInsets.symmetric(
+                        vertical: 0.0,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Center(
                                     child: Text(
-                                      'Country\n${tappedText.country}',
-                                      textAlign: TextAlign.center,
+                                      '${tappedText.country}',
                                       style: TextStyle(
-                                        fontWeight: FontWeight.normal,
                                         color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 25.0,
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: tappedText.totalCases == 'NONE' ||
-                                            tappedText.totalCases == 'NO'
-                                        ? Colors.blue
-                                        : int.parse(tappedText.totalCases
-                                                    .replaceAll(',', '')
-                                                    .toString()) >=
-                                                100
-                                            ? Colors.red[700]
-                                            : Colors.purple[700],
+                                  SizedBox(
+                                    height: 10.0,
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      'Total Cases\n${tappedText.totalCases}',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.normal,
-                                        color: Colors.white,
-                                      ),
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: <Widget>[
+                                        Text(
+                                          '${tappedText.totalCases}\nTotal Cases',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: tappedText.totalCases ==
+                                                        'NONE' ||
+                                                    tappedText.totalCases ==
+                                                        'NO'
+                                                ? Colors.greenAccent[100]
+                                                : int.parse(tappedText
+                                                            .totalCases
+                                                            .replaceAll(',', '')
+                                                            .toString()) >=
+                                                        10
+                                                    ? Colors.pink[400]
+                                                    : Colors.greenAccent[100],
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15.0,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${tappedText.newCases}\nNew Cases',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: tappedText.newCases ==
+                                                        'NONE' ||
+                                                    tappedText.newCases == 'NO'
+                                                ? Colors.greenAccent[100]
+                                                : int.parse(tappedText.newCases
+                                                            .replaceAll(',', '')
+                                                            .toString()) >=
+                                                        10
+                                                    ? Colors.red[300]
+                                                    : Colors.yellow[300],
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15.0,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${tappedText.totalRecovered}\nTotal Recovered',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: tappedText.totalRecovered ==
+                                                        'NONE' ||
+                                                    tappedText.totalRecovered ==
+                                                        'NO'
+                                                ? Colors.blue
+                                                : int.parse(tappedText
+                                                            .totalRecovered
+                                                            .replaceAll(',', '')
+                                                            .toString()) >=
+                                                        10
+                                                    ? Colors.greenAccent[100]
+                                                    : Colors.red[300],
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15.0,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: tappedText.newCases == 'NO'
-                                        ? Colors.green[700]
-                                        : int.parse(tappedText.newCases
-                                                    .replaceFirst('+', '')) >=
-                                                20
-                                            ? Colors.red
-                                            : Colors.orange,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'New Cases\n${tappedText.newCases}',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.normal,
-                                        color: Colors.white,
-                                      ),
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: <Widget>[
+                                        Text(
+                                          '${tappedText.totalDeaths}\nTotal Deaths',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: tappedText.totalDeaths ==
+                                                        'NONE' ||
+                                                    tappedText.totalDeaths ==
+                                                        'NO'
+                                                ? Colors.blue
+                                                : int.parse(tappedText
+                                                            .totalDeaths
+                                                            .replaceAll(',', '')
+                                                            .toString()) >=
+                                                        50
+                                                    ? Colors.red[300]
+                                                    : Colors.purpleAccent[100],
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15.0,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${tappedText.newDeaths}\nNew Deaths',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: tappedText.newDeaths ==
+                                                        'NONE' ||
+                                                    tappedText.newDeaths == 'NO'
+                                                ? Colors.blue
+                                                : int.parse(tappedText.newDeaths
+                                                            .replaceAll(',', '')
+                                                            .toString()) >=
+                                                        10
+                                                    ? Colors.red[300]
+                                                    : Colors.purpleAccent[100],
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15.0,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                ),
+                                  )
+                                ],
                               ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: <Widget>[
-                              Expanded(
-                                child: Container(
-                                  color: tappedText.totalDeaths == 'NONE' ||
-                                          tappedText.totalDeaths == 'NO'
-                                      ? Colors.blue
-                                      : int.parse(tappedText.totalDeaths
-                                                  .replaceAll(',', '')
-                                                  .toString()) >=
-                                              50
-                                          ? Colors.red[700]
-                                          : Colors.purple[700],
-                                  child: Center(
-                                    child: Text(
-                                      'Total Deaths\n${tappedText.totalDeaths}',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.normal,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  color: tappedText.newDeaths == 'NONE' ||
-                                          tappedText.newDeaths == 'NO'
-                                      ? Colors.blue
-                                      : int.parse(tappedText.newDeaths
-                                                  .replaceAll(',', '')
-                                                  .toString()) >=
-                                              10
-                                          ? Colors.red[700]
-                                          : Colors.purple[700],
-                                  child: Center(
-                                    child: Text(
-                                      'New Deaths\n${tappedText.newDeaths}',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.normal,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  color: tappedText.totalRecovered == 'NONE' ||
-                                          tappedText.totalRecovered == 'NO'
-                                      ? Colors.blue
-                                      : int.parse(tappedText.totalRecovered
-                                                  .replaceAll(',', '')
-                                                  .toString()) >=
-                                              10
-                                          ? Colors.green[900]
-                                          : Colors.red[700],
-                                  child: Center(
-                                    child: Text(
-                                      'Total Recovered\n${tappedText.totalRecovered}',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.normal,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ],
