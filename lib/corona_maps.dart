@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:html/dom.dart' as dom;
-import 'package:html/parser.dart';
-import 'package:http/http.dart' as http;
 
 class CoronaMaps extends StatefulWidget {
+  final List<Results> resultData;
+
+  CoronaMaps({this.resultData});
+
   @override
   _CoronaMapsState createState() => _CoronaMapsState();
 }
@@ -17,6 +18,9 @@ class CoronaMaps extends StatefulWidget {
 class _CoronaMapsState extends State<CoronaMaps> {
   String mapStyle;
   Set<Marker> markers = Set();
+
+  // new markers
+  Map<MarkerId, Marker> newMarkers = <MarkerId, Marker>{};
   Results tappedText = Results(
     country: 'Nothing',
     newCases: '0',
@@ -26,165 +30,112 @@ class _CoronaMapsState extends State<CoronaMaps> {
     totalRecovered: '0',
   );
   LatLng tappedPos;
-
-  List<String> countriesList = [];
-  List<String> totalCasesList = [];
-  List<String> newCasesList = [];
-  List<String> totalDeathsList = [];
-  List<String> newDeathsList = [];
-  List<String> totalRecovered = [];
-
-  List<Placemark> placemark = [];
-
-  Map<String, dynamic> results = {};
-  List<Map<String, dynamic>> data = [];
-  List<Results> info = [];
+  double tapZoom = 4.0;
 
   bool loading = true;
-  bool showReloadMsg = false;
   bool displayData = false;
+  Timer load;
+  int counter = 0;
+
+  int _start = 5;
+  int _current = 5;
 
   Future getCountries() async {
-    setState(() {
-      // clear when reload
-      loading = true;
-      showReloadMsg = false;
-      info.clear();
-      data.clear();
-      countriesList.clear();
-      totalCasesList.clear();
-      totalDeathsList.clear();
-      newDeathsList.clear();
-      totalRecovered.clear();
-      newCasesList.clear();
-    });
+    List<Results> data = widget.resultData;
 
-    Timer(Duration(seconds: 3), () {
+    // for loop to add placemarkers
+    Timer.run(() {
       setState(() {
-        showReloadMsg = true;
+        loading = true;
       });
     });
-    // fetch data
-    http.Client client = http.Client();
-    http.Response response =
-        await client.get('https://www.worldometers.info/coronavirus/');
-    var document = parse(response.body);
 
-    // print data
-    List<dom.Element> totalCases = document.getElementsByTagName('td');
-
-    for (int x = 0; x <= 72; x += 9) {
-      if (x != 72) {
-        countriesList.add(totalCases[x].querySelector('a').innerHtml.trim());
-      } else {
-        countriesList.add(totalCases[x].querySelector('span').innerHtml.trim());
+    load = Timer.periodic(Duration(seconds: 5), (d) {
+      for (int i = 0; i < widget.resultData.length; i++) {
+        _addPlacemarkers(i);
       }
-    }
-
-    // Countries
-    for (int x = 81; x < totalCases.length; x += 9) {
-      countriesList.add(totalCases[x].innerHtml.trim());
-    }
-
-    // Total Cases
-    for (int x = 1; x < totalCases.length; x += 9) {
-      totalCasesList.add(totalCases[x].innerHtml.trim());
-    }
-
-    for (int x = 2; x < totalCases.length; x += 9) {
-      if (totalCases[x].innerHtml.trim().length != 0) {
-        newCasesList.add(totalCases[x].innerHtml.trim());
-      } else {
-        newCasesList.add('NO');
-      }
-    }
-
-    for (int x = 3; x < totalCases.length; x += 9) {
-      if (totalCases[x].innerHtml.trim().length != 0) {
-        totalDeathsList.add(totalCases[x].innerHtml.trim());
-      } else {
-        totalDeathsList.add('NONE');
-      }
-    }
-
-    for (int x = 4; x < totalCases.length; x += 9) {
-      if (totalCases[x].innerHtml.trim().length != 0) {
-        newDeathsList.add(totalCases[x].innerHtml.trim());
-      } else {
-        newDeathsList.add('NO');
-      }
-    }
-
-    for (int x = 5; x < totalCases.length; x += 9) {
-      if (totalCases[x].innerHtml.trim().length != 0) {
-        totalRecovered.add(totalCases[x].innerHtml.trim());
-      } else {
-        totalRecovered.add('NONE');
-      }
-    }
-
-    // remove total tr
-    countriesList.removeLast();
-    totalCasesList.removeLast();
-    totalDeathsList.removeLast();
-    newDeathsList.removeLast();
-    totalRecovered.removeLast();
-    newCasesList.removeLast();
-
-    for (int i = 0; i < countriesList.length; i++) {
-      data.add({
-        'country': countriesList[i],
-        'totalCases': totalCasesList[i],
-        'newCases': newCasesList[i],
-        'totalDeaths': totalDeathsList[i],
-        'newDeaths': newDeathsList[i],
-        'totalRecovered': totalRecovered[i],
+      setState(() {
+        counter++;
+        loading = false;
       });
-    }
-
-    info = data.map((res) => Results.fromJson(res)).toList();
-    //print(info);
-    setState(() {
-      loading = false;
-      showReloadMsg = false;
+      print('refresh');
     });
-
-    for (int i = 0; i < info.length; i++) {
-      _generateMapData(i);
-    }
-
-    print(markers.length);
-
-    print(placemark[0].position.latitude);
   }
 
-  _generateMapData(int i) async {
-    List<Placemark> pm = await Geolocator().placemarkFromAddress(
-        "${info[i].country == 'S. Korea' ? info[i].country.split('S. ')[1] : info[i].country}");
-    markers.add(
-      Marker(
-          markerId: MarkerId(info[i].country),
-          position: LatLng(
-            pm[0].position.latitude,
-            pm[0].position.longitude,
-          ),
-          consumeTapEvents: true,
-          onTap: () {
-            print('${info[i].country}');
-            setState(() {
-              tappedText = info[i];
-            });
-            _mapController.animateCamera(
-              CameraUpdate.newCameraPosition(
-                CameraPosition(
-                  target:
-                      LatLng(pm[0].position.latitude, pm[0].position.longitude),
-                  zoom: 4.0,
-                ),
+  _addPlacemarkers(int i) async {
+    List<Placemark> pm = await Geolocator()
+        .placemarkFromAddress(
+            '${widget.resultData[i].country == 'S. Korea' ? widget.resultData[i].country.split('S. ')[1] : widget.resultData[i].country}')
+        .catchError((onError) {
+      print('Err');
+    });
+    print('loading Data');
+    Marker theMarker = Marker(
+      markerId: MarkerId(widget.resultData[i].country),
+      position: LatLng(
+        pm[0].position.latitude,
+        pm[0].position.longitude,
+      ),
+      consumeTapEvents: true,
+      infoWindow: InfoWindow(
+        onTap: () {
+          print('Test');
+        },
+        title: 'Test',
+      ),
+      onTap: () {
+        setState(() {
+          tappedText = widget.resultData[i];
+        });
+        _mapController.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: LatLng(
+                pm[0].position.latitude,
+                pm[0].position.longitude,
               ),
-            );
-          }),
+              zoom: tapZoom,
+            ),
+          ),
+        );
+      },
     );
+    setState(() {
+      newMarkers[MarkerId(widget.resultData[i].country)] = theMarker;
+    });
+    print(newMarkers[MarkerId(widget.resultData[i].country)].markerId);
+//    markers.add(
+//      Marker(
+//        markerId: MarkerId(widget.resultData[i].country),
+//        position: LatLng(
+//          pm[0].position.latitude,
+//          pm[0].position.longitude,
+//        ),
+//        consumeTapEvents: true,
+//        infoWindow: InfoWindow(
+//          onTap: () {
+//            print('Test');
+//          },
+//          title: 'Test',
+//        ),
+//        onTap: () {
+//          setState(() {
+//            tappedText = widget.resultData[i];
+//          });
+//          _mapController.animateCamera(
+//            CameraUpdate.newCameraPosition(
+//              CameraPosition(
+//                target: LatLng(
+//                  pm[0].position.latitude,
+//                  pm[0].position.longitude,
+//                ),
+//                zoom: tapZoom,
+//              ),
+//            ),
+//          );
+//        },
+//      ),
+//    );
   }
 
   GoogleMapController _mapController;
@@ -193,10 +144,19 @@ class _CoronaMapsState extends State<CoronaMaps> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getCountries();
     rootBundle.loadString('assets/maps/dark_maps.txt').then((string) {
       mapStyle = string;
     });
+    getCountries();
+    setState(() {
+      loading = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
   }
 
   @override
@@ -204,7 +164,29 @@ class _CoronaMapsState extends State<CoronaMaps> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xff1d2c4d),
-        title: Text('Corona Maps'),
+        title: Column(
+          children: <Widget>[
+            Text(
+              'Current Cases: ${widget.resultData.length}',
+              style: TextStyle(
+                fontSize: 13.0,
+              ),
+            ),
+            Text(
+              'Markers: ${newMarkers.length}',
+              style: TextStyle(
+                fontSize: 13.0,
+              ),
+            ),
+            Text(
+              'Refreshing every 10 seconds',
+              style: TextStyle(
+                fontSize: 13.0,
+                color: Colors.greenAccent,
+              ),
+            ),
+          ],
+        ),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.refresh),
@@ -233,9 +215,14 @@ class _CoronaMapsState extends State<CoronaMaps> {
                       },
                       initialCameraPosition:
                           CameraPosition(target: LatLng(16, 180)),
-                      markers: markers,
+                      markers: Set<Marker>.of(newMarkers.values),
                       myLocationButtonEnabled: false,
                       myLocationEnabled: true,
+                      onCameraMove: (CameraPosition pos) {
+                        setState(() {
+                          tapZoom = pos.zoom;
+                        });
+                      },
                     ),
                   ),
                   Container(

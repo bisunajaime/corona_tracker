@@ -177,7 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               child: Center(
                 child: Text(
-                  'Corona \n Tracker',
+                  'Corona \n Tracker: ${info.length}',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -188,8 +188,14 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             MaterialButton(
-              onPressed: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => CoronaMaps())),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CoronaMaps(
+                    resultData: info,
+                  ),
+                ),
+              ),
               child: ListTile(
                 leading: Icon(Icons.location_on),
                 title: Text('Corona Maps'),
@@ -199,7 +205,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       appBar: AppBar(
-        title: Text('Corona Tracker'),
+        title: Text('Corona Tracker: ${info.length}'),
         backgroundColor: Colors.red[800],
         actions: <Widget>[
           IconButton(
