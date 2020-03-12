@@ -359,7 +359,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                       ? Colors.greenAccent
                                       : int.parse(info[i]
                                                   .newCases
-                                                  .replaceFirst('+', '')) >=
+                                                  .replaceFirst('+', '')
+                                                  .replaceAll(',', '')) >=
                                               10
                                           ? Colors.amber
                                           : Colors.orange,
