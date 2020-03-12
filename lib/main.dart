@@ -160,51 +160,93 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: Drawer(
-        child: Column(
+        child: Container(
+          color: Color(0xff1C2844),
+          child: Column(
+            children: <Widget>[
+              Container(
+                width: double.infinity,
+                height: 200,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.indigo[900],
+                      Colors.indigo[800],
+                    ],
+                  ),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        'Corona Tracker',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 30,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        '${info.length} \nAffected Places',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.yellow,
+                          fontSize: 20,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              MaterialButton(
+                color: Color(0xff374972),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CoronaMaps(
+                      resultData: info,
+                    ),
+                  ),
+                ),
+                child: ListTile(
+                  leading: Icon(
+                    Icons.location_on,
+                    color: Colors.yellow,
+                  ),
+                  title: Text(
+                    'Corona Maps',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+      appBar: AppBar(
+        title: Column(
           children: <Widget>[
-            Container(
-              width: double.infinity,
-              height: 200,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.orange,
-                    Colors.pink,
-                  ],
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  'Corona \n Tracker: ${info.length}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontSize: 30,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            MaterialButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CoronaMaps(
-                    resultData: info,
-                  ),
-                ),
-              ),
-              child: ListTile(
-                leading: Icon(Icons.location_on),
-                title: Text('Corona Maps'),
+            Text('Corona Tracker'),
+            Text(
+              '${info.length} Places',
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.cyanAccent,
               ),
             )
           ],
         ),
-      ),
-      appBar: AppBar(
-        title: Text('Corona Tracker: ${info.length}'),
-        backgroundColor: Colors.red[800],
+        centerTitle: true,
+        backgroundColor: Color(0xff1d2c4d),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.refresh),
@@ -215,6 +257,7 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
+      backgroundColor: Color(0xff375087),
       body: loading
           ? Center(
               child: Column(
@@ -248,12 +291,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Color(0xff1d2c4d),
                     borderRadius: BorderRadius.circular(5),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.blueGrey,
-                        blurRadius: 5.0,
+                        color: Colors.black45,
+                        blurRadius: 10.0,
                       )
                     ],
                   ),
@@ -267,6 +310,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             '${info[i].country}',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
+                              color: Colors.white,
                               fontSize: 20.0,
                             ),
                           ),
@@ -278,12 +322,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                   fontWeight: FontWeight.bold,
                                   fontSize: 20,
                                   color: info[i].newCases == 'NO'
-                                      ? Colors.green[700]
+                                      ? Colors.greenAccent
                                       : int.parse(info[i]
                                                   .newCases
                                                   .replaceFirst('+', '')) >=
-                                              20
-                                          ? Colors.red
+                                              10
+                                          ? Colors.amber
                                           : Colors.orange,
                                 ),
                               ),
@@ -292,6 +336,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 10.0,
+                                  color: Colors.white,
                                 ),
                               )
                             ],
@@ -327,7 +372,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             children: <Widget>[
                               TotalRecovered(
                                 data: info[i].totalRecovered,
-                                type: 'Total \n Recovered',
+                                type: 'Total Recovered:',
                               )
                             ],
                           )
@@ -357,15 +402,11 @@ class TotalCases extends StatelessWidget {
         ),
         padding: EdgeInsets.all(5),
         decoration: BoxDecoration(
-          color: data == 'NONE' || data == 'NO'
-              ? Colors.blue
-              : int.parse(data.replaceAll(',', '').toString()) >= 100
-                  ? Colors.red[700]
-                  : Colors.purple[700],
+          color: Color(0xff131C2F),
           borderRadius: BorderRadius.circular(5),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey,
+              color: Colors.black45,
               blurRadius: 2.0,
             ),
           ],
@@ -376,7 +417,12 @@ class TotalCases extends StatelessWidget {
               '$data',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                fontSize: 20,
+                color: data == 'NONE' || data == 'NO'
+                    ? Colors.greenAccent[100]
+                    : int.parse(data.replaceAll(',', '').toString()) >= 10
+                        ? Colors.pinkAccent[100]
+                        : Colors.greenAccent[100],
               ),
             ),
             SizedBox(
@@ -414,15 +460,11 @@ class TotalDeaths extends StatelessWidget {
         ),
         padding: EdgeInsets.all(5),
         decoration: BoxDecoration(
-          color: data == 'NONE' || data == 'NO'
-              ? Colors.blue
-              : int.parse(data.replaceAll(',', '').toString()) >= 50
-                  ? Colors.red[700]
-                  : Colors.purple[700],
+          color: Color(0xff131C2F),
           borderRadius: BorderRadius.circular(5),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey,
+              color: Colors.black45,
               blurRadius: 2.0,
             ),
           ],
@@ -433,7 +475,12 @@ class TotalDeaths extends StatelessWidget {
               '$data',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                fontSize: 20,
+                color: data == 'NONE' || data == 'NO'
+                    ? Colors.greenAccent
+                    : int.parse(data.replaceAll(',', '').toString()) >= 50
+                        ? Colors.redAccent[100]
+                        : Colors.purpleAccent[100],
               ),
             ),
             SizedBox(
@@ -471,15 +518,11 @@ class NewDeaths extends StatelessWidget {
         ),
         padding: EdgeInsets.all(5),
         decoration: BoxDecoration(
-          color: data == 'NONE' || data == 'NO'
-              ? Colors.blue
-              : int.parse(data.replaceAll(',', '').toString()) >= 10
-                  ? Colors.red[700]
-                  : Colors.purple[700],
+          color: Color(0xff131C2F),
           borderRadius: BorderRadius.circular(5),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey,
+              color: Colors.black45,
               blurRadius: 2.0,
             ),
           ],
@@ -490,7 +533,12 @@ class NewDeaths extends StatelessWidget {
               '$data',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                fontSize: 20,
+                color: data == 'NONE' || data == 'NO'
+                    ? Colors.greenAccent
+                    : int.parse(data.replaceAll(',', '').toString()) >= 10
+                        ? Colors.yellow
+                        : Colors.purpleAccent[100],
               ),
             ),
             SizedBox(
@@ -526,40 +574,43 @@ class TotalRecovered extends StatelessWidget {
         margin: EdgeInsets.symmetric(
           horizontal: 5.0,
         ),
-        padding: EdgeInsets.all(5),
+        padding: EdgeInsets.symmetric(
+          vertical: 15.0,
+        ),
         decoration: BoxDecoration(
-          color: data == 'NONE' || data == 'NO'
-              ? Colors.blue
-              : int.parse(data.replaceAll(',', '').toString()) >= 10
-                  ? Colors.green[900]
-                  : Colors.red[700],
+          color: Color(0xff131C2F),
           borderRadius: BorderRadius.circular(5),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey,
+              color: Colors.black45,
               blurRadius: 2.0,
             ),
           ],
         ),
-        child: Column(
+        child: Row(
           children: <Widget>[
             Text(
-              '$data',
+              '$type',
+              textAlign: TextAlign.center,
               style: TextStyle(
+                fontSize: 15.0,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
             ),
             SizedBox(
-              height: 5.0,
+              width: 10.0,
             ),
             Text(
-              '$type',
-              textAlign: TextAlign.center,
+              '$data',
               style: TextStyle(
-                fontSize: 12.0,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                fontSize: 20,
+                color: data == 'NONE' || data == 'NO'
+                    ? Colors.blueAccent
+                    : int.parse(data.replaceAll(',', '').toString()) >= 10
+                        ? Colors.greenAccent[100]
+                        : Colors.redAccent[100],
               ),
             ),
           ],
