@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 class TotalRecovered extends StatelessWidget {
   final String data;
   final String type;
+  final double dataSize;
+  final double textSize;
 
-  TotalRecovered({this.data, this.type});
+  TotalRecovered({this.data, this.type, this.dataSize, this.textSize});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +34,7 @@ class TotalRecovered extends StatelessWidget {
               '$data',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 20,
+                fontSize: dataSize,
                 color: data == 'NONE' || data == 'NO'
                     ? Colors.blueAccent
                     : int.parse(data.replaceAll(',', '').toString()) >= 10
@@ -47,7 +49,7 @@ class TotalRecovered extends StatelessWidget {
               '$type',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 15.0,
+                fontSize: textSize,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),

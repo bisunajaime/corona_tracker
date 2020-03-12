@@ -388,14 +388,20 @@ class _MyHomePageState extends State<MyHomePage> {
                               TotalCases(
                                 data: info[i].totalCases,
                                 type: 'Total \nCases',
+                                dataSize: 20,
+                                textSize: 12,
                               ),
                               TotalDeaths(
                                 data: info[i].totalDeaths,
                                 type: 'Total \nDeaths',
+                                dataSize: 20,
+                                textSize: 12,
                               ),
                               NewDeaths(
                                 data: info[i].newDeaths,
                                 type: 'New \n Deaths',
+                                dataSize: 20,
+                                textSize: 12,
                               ),
                             ],
                           ),
@@ -407,10 +413,14 @@ class _MyHomePageState extends State<MyHomePage> {
                               TotalRecovered(
                                 data: info[i].totalRecovered,
                                 type: 'Total Recovered',
+                                dataSize: 20,
+                                textSize: 15,
                               ),
                               ActiveCases(
                                 data: info[i].activeCases,
                                 type: 'Active Cases',
+                                dataSize: 20,
+                                textSize: 15,
                               ),
                             ],
                           ),
@@ -422,6 +432,9 @@ class _MyHomePageState extends State<MyHomePage> {
                               SeriousCritical(
                                 data: info[i].seriousCritical,
                                 type: 'Serious, Critical',
+                                dataSize: 25,
+                                textSize: 15,
+                                isRow: false,
                               )
                             ],
                           )

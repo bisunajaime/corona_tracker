@@ -3,8 +3,15 @@ import 'package:flutter/material.dart';
 class TotalCases extends StatelessWidget {
   final String data;
   final String type;
+  final double dataSize;
+  final double textSize;
 
-  TotalCases({this.data, this.type});
+  TotalCases({
+    this.data,
+    this.type,
+    this.dataSize,
+    this.textSize,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +39,7 @@ class TotalCases extends StatelessWidget {
               '$data',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 20,
+                fontSize: dataSize,
                 color: data == 'NONE' || data == 'NO'
                     ? Colors.greenAccent[100]
                     : int.parse(data.replaceAll(',', '').toString()) >= 10
@@ -47,7 +54,7 @@ class TotalCases extends StatelessWidget {
               '$type',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 12.0,
+                fontSize: textSize,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
