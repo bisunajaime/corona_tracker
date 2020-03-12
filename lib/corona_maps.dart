@@ -47,7 +47,6 @@ class _CoronaMapsState extends State<CoronaMaps> {
   Timer load;
   int counter = 0;
   GoogleMapController _mapController;
-  Completer<GoogleMapController> _controller = Completer();
 
   getMarkers(Results data) async {
     try {
@@ -90,7 +89,7 @@ class _CoronaMapsState extends State<CoronaMaps> {
         newMarkers[MarkerId(data.country)] = theMarker;
       });
     } catch (e) {
-      throw e;
+      print('<< $e >>;');
     }
   }
 
@@ -136,6 +135,7 @@ class _CoronaMapsState extends State<CoronaMaps> {
   void dispose() {
     // TODO: implement dispose
     load.cancel();
+    markers.clear();
     super.dispose();
   }
 
@@ -188,7 +188,6 @@ class _CoronaMapsState extends State<CoronaMaps> {
                     child: GoogleMap(
                       onMapCreated: (GoogleMapController controller) {
                         _mapController = controller;
-                        _controller.complete();
                         _mapController.setMapStyle(mapStyle);
                       },
                       initialCameraPosition:
@@ -209,7 +208,7 @@ class _CoronaMapsState extends State<CoronaMaps> {
                     flex: 2,
                     child: Container(
                       width: double.infinity,
-                      color: Color(0xff1d2c4d),
+                      color: Color(0xff10182B),
                       margin: EdgeInsets.symmetric(
                         vertical: 0.0,
                       ),
@@ -245,70 +244,74 @@ class _CoronaMapsState extends State<CoronaMaps> {
                                     ],
                                   ),
                                 ),
-                                Expanded(
-                                  flex: 4,
-                                  child: Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: <Widget>[
-                                      Row(
-                                        children: <Widget>[
-                                          TotalCases(
-                                            data: tappedText.totalCases,
-                                            type: 'Total Cases',
-                                            dataSize: 20,
-                                            textSize: 12,
-                                          ),
-                                          TotalRecovered(
-                                            data: tappedText.totalRecovered,
-                                            type: 'Total Recovered',
-                                            dataSize: 20,
-                                            textSize: 12,
-                                          ),
-                                          ActiveCases(
-                                            data: tappedText.activeCases,
-                                            type: 'Active Cases',
-                                            dataSize: 20,
-                                            textSize: 12,
-                                          ),
-                                        ],
+                                tappedText.totalCases == '0'
+                                    ? SizedBox()
+                                    : Expanded(
+                                        flex: 4,
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: <Widget>[
+                                            Row(
+                                              children: <Widget>[
+                                                TotalCases(
+                                                  data: tappedText.totalCases,
+                                                  type: 'Total Cases',
+                                                  dataSize: 20,
+                                                  textSize: 12,
+                                                ),
+                                                TotalRecovered(
+                                                  data:
+                                                      tappedText.totalRecovered,
+                                                  type: 'Total Recovered',
+                                                  dataSize: 20,
+                                                  textSize: 12,
+                                                ),
+                                                ActiveCases(
+                                                  data: tappedText.activeCases,
+                                                  type: 'Active Cases',
+                                                  dataSize: 20,
+                                                  textSize: 12,
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            Row(
+                                              children: <Widget>[
+                                                TotalDeaths(
+                                                  data: tappedText.totalDeaths,
+                                                  type: 'Total Deaths',
+                                                  dataSize: 20,
+                                                  textSize: 12,
+                                                ),
+                                                NewDeaths(
+                                                  data: tappedText.newDeaths,
+                                                  type: 'New Deaths',
+                                                  dataSize: 20,
+                                                  textSize: 12,
+                                                )
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            Row(
+                                              children: <Widget>[
+                                                SeriousCritical(
+                                                  data: tappedText
+                                                      .seriousCritical,
+                                                  type: 'Serious, Critical: ',
+                                                  dataSize: 15,
+                                                  textSize: 15,
+                                                  isRow: true,
+                                                ),
+                                              ],
+                                            )
+                                          ],
+                                        ),
                                       ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      Row(
-                                        children: <Widget>[
-                                          TotalDeaths(
-                                            data: tappedText.totalDeaths,
-                                            type: 'Total Deaths',
-                                            dataSize: 20,
-                                            textSize: 12,
-                                          ),
-                                          NewDeaths(
-                                            data: tappedText.newDeaths,
-                                            type: 'New Deaths',
-                                            dataSize: 20,
-                                            textSize: 12,
-                                          )
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      Row(
-                                        children: <Widget>[
-                                          SeriousCritical(
-                                            data: tappedText.seriousCritical,
-                                            type: 'Serious, Critical: ',
-                                            dataSize: 15,
-                                            textSize: 15,
-                                            isRow: true,
-                                          ),
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                ),
                               ],
                             ),
                           )
