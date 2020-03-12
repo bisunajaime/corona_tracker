@@ -60,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
       newCasesList.clear();
     });
 
-    Timer(Duration(seconds: 3), () {
+    Timer(Duration(seconds: 5), () {
       setState(() {
         showReloadMsg = true;
       });
@@ -74,17 +74,14 @@ class _MyHomePageState extends State<MyHomePage> {
     // print data
     List<dom.Element> totalCases = document.getElementsByTagName('td');
 
-    for (int x = 0; x <= 72; x += 9) {
-      if (x != 72) {
+    for (int x = 0; x < totalCases.length; x += 9) {
+      if (totalCases[x].innerHtml.contains('<a')) {
         countriesList.add(totalCases[x].querySelector('a').innerHtml.trim());
-      } else {
+      } else if (totalCases[x].innerHtml.contains('<span')) {
         countriesList.add(totalCases[x].querySelector('span').innerHtml.trim());
+      } else {
+        countriesList.add(totalCases[x].innerHtml.trim());
       }
-    }
-
-    // Countries
-    for (int x = 81; x < totalCases.length; x += 9) {
-      countriesList.add(totalCases[x].innerHtml.trim());
     }
 
     // Total Cases
@@ -213,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: Icon(Icons.refresh),
             onPressed: () {
               getCountries();
-              getMarkers.cancel();
+              //getMarkers.cancel();
             },
           )
         ],

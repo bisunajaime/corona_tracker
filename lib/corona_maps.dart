@@ -42,7 +42,7 @@ class _CoronaMapsState extends State<CoronaMaps> {
     try {
       List<Placemark> placemarks = await Geolocator().placemarkFromAddress(
           '${data.country == 'S. Korea' ? data.country.replaceAll('S. ', '') : data.country}');
-      Placemark thePlacemark = placemarks[0];
+      Placemark thePlacemark = placemarks.first;
       Marker theMarker = Marker(
         markerId: MarkerId(data.country),
         position: LatLng(
@@ -148,7 +148,7 @@ class _CoronaMapsState extends State<CoronaMaps> {
               ),
             ),
             Text(
-              'Takes a while to load the map',
+              'Takes a while to load the markers',
               style: TextStyle(
                 fontSize: 13.0,
                 color: Colors.greenAccent,
@@ -203,30 +203,54 @@ class _CoronaMapsState extends State<CoronaMaps> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
                           Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Center(
-                                    child: Text(
-                                      '${tappedText.country}',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 25.0,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: <Widget>[
+                                      Icon(
+                                        Icons.location_on,
+                                        color: Colors.red,
                                       ),
-                                    ),
+                                      SizedBox(
+                                        width: 10.0,
+                                      ),
+                                      Text(
+                                        '${tappedText.country}',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 30.0,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  SizedBox(
-                                    height: 10.0,
-                                  ),
-                                  Expanded(
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: <Widget>[
-                                        Text(
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: ListView(
+                                    scrollDirection: Axis.horizontal,
+                                    physics: BouncingScrollPhysics(),
+                                    children: <Widget>[
+                                      Container(
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xff162138),
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                        ),
+                                        margin: EdgeInsets.symmetric(
+                                          vertical: 15.0,
+                                          horizontal: 5.0,
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 15.0,
+                                        ),
+                                        child: Text(
                                           '${tappedText.totalCases}\nTotal Cases',
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
@@ -243,10 +267,25 @@ class _CoronaMapsState extends State<CoronaMaps> {
                                                     ? Colors.pink[400]
                                                     : Colors.greenAccent[100],
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 15.0,
+                                            fontSize: 20.0,
                                           ),
                                         ),
-                                        Text(
+                                      ),
+                                      Container(
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xff162138),
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                        ),
+                                        margin: EdgeInsets.symmetric(
+                                          vertical: 15.0,
+                                          horizontal: 5.0,
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 15.0,
+                                        ),
+                                        child: Text(
                                           '${tappedText.newCases}\nNew Cases',
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
@@ -261,10 +300,25 @@ class _CoronaMapsState extends State<CoronaMaps> {
                                                     ? Colors.red[300]
                                                     : Colors.yellow[300],
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 15.0,
+                                            fontSize: 20.0,
                                           ),
                                         ),
-                                        Text(
+                                      ),
+                                      Container(
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xff162138),
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                        ),
+                                        margin: EdgeInsets.symmetric(
+                                          vertical: 15.0,
+                                          horizontal: 5.0,
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 15.0,
+                                        ),
+                                        child: Text(
                                           '${tappedText.totalRecovered}\nTotal Recovered',
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
@@ -281,18 +335,25 @@ class _CoronaMapsState extends State<CoronaMaps> {
                                                     ? Colors.greenAccent[100]
                                                     : Colors.red[300],
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 15.0,
+                                            fontSize: 20.0,
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: <Widget>[
-                                        Text(
+                                      ),
+                                      Container(
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xff162138),
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                        ),
+                                        margin: EdgeInsets.symmetric(
+                                          vertical: 15.0,
+                                          horizontal: 5.0,
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 15.0,
+                                        ),
+                                        child: Text(
                                           '${tappedText.totalDeaths}\nTotal Deaths',
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
@@ -309,10 +370,25 @@ class _CoronaMapsState extends State<CoronaMaps> {
                                                     ? Colors.red[300]
                                                     : Colors.purpleAccent[100],
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 15.0,
+                                            fontSize: 20.0,
                                           ),
                                         ),
-                                        Text(
+                                      ),
+                                      Container(
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xff162138),
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                        ),
+                                        margin: EdgeInsets.symmetric(
+                                          vertical: 15.0,
+                                          horizontal: 5.0,
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 15.0,
+                                        ),
+                                        child: Text(
                                           '${tappedText.newDeaths}\nNew Deaths',
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
@@ -327,14 +403,14 @@ class _CoronaMapsState extends State<CoronaMaps> {
                                                     ? Colors.red[300]
                                                     : Colors.purpleAccent[100],
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 15.0,
+                                            fontSize: 20.0,
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           )
                         ],
