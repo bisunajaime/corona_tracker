@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:coronatracker/corona_maps.dart';
+import 'package:coronatracker/more_info.dart';
 import 'package:coronatracker/widgets/active_cases.dart';
 import 'package:coronatracker/widgets/new_deaths.dart';
 import 'package:coronatracker/widgets/serious_critical.dart';
@@ -45,10 +47,13 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> totalRecovered = [];
   List<String> activeCasesList = [];
   List<String> seriousCriticalList = [];
+  List<Map<String, dynamic>> jsonCountryData = [];
 
   Map<String, dynamic> results = {};
+  Map<String, dynamic> moreRes = {};
   List<Map<String, dynamic>> data = [];
   List<Results> info = [];
+  MoreResults moreResults;
 
   bool loading = true;
   bool showReloadMsg = false;
@@ -149,6 +154,29 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }
 
+    // more info load data
+
+    List<dom.Element> totalsCDR = document
+        .querySelectorAll('body div#maincounter-wrap .maincounter-number span');
+    print('printing');
+    List<dom.Element> totalsARC =
+        document.querySelectorAll('body div.panel_front div.number-table-main');
+    List<dom.Element> totalsSD =
+        document.querySelectorAll('body div.panel_front span.number-table');
+
+    setState(() {
+      moreResults = MoreResults(
+        totalCases: totalsCDR[0].innerHtml.trim() ?? 'NONE',
+        totalDeaths: totalsCDR[1].innerHtml.trim() ?? 'NONE',
+        totalRecovered: totalsCDR[2].innerHtml.trim() ?? 'NONE',
+        totalActiveCases: totalsARC[0].innerHtml.trim() ?? 'NONE',
+        totalClosedCases: totalsARC[1].innerHtml.trim() ?? 'NONE',
+        totalMild: totalsSD[0].innerHtml.trim() ?? 'NONE',
+        totalSeriousCritical: totalsSD[1].innerHtml.trim() ?? 'NONE',
+        totalDischarged: totalsSD[2].innerHtml.trim() ?? 'NONE',
+      );
+    });
+
     // remove total tr
     countriesList.removeLast();
     totalCasesList.removeLast();
@@ -171,7 +199,25 @@ class _MyHomePageState extends State<MyHomePage> {
         'seriousCritical': seriousCriticalList[i],
       });
     }
+    Map<String, dynamic> countryJsonData = {};
+    for (int i = 0; i < countriesList.length; i++) {
+      countryJsonData['${countriesList[i]}'] = {
+        'totalCases': totalCasesList[i],
+        'newCases': newCasesList[i],
+        'totalDeaths': totalDeathsList[i],
+        'newDeaths': newDeathsList[i],
+        'totalRecovered': totalRecovered[i],
+        'activeCases': activeCasesList[i],
+        'seriousCritical': seriousCriticalList[i],
+      };
+    }
 
+    jsonCountryData.add(countryJsonData);
+    var s = jsonCountryData.map((f) {
+      return f['totalCases'];
+    });
+
+    print(s);
     info = data.map((res) => Results.fromJson(res)).toList();
 
     setState(() {
@@ -182,7 +228,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     getCountries();
     super.initState();
     //initiate();
@@ -242,6 +287,29 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(
+                    builder: (context) => MoreInfo(
+                      results: moreResults,
+                    ),
+                  ),
+                ),
+                child: ListTile(
+                  leading: Icon(
+                    Icons.info_outline,
+                    color: Colors.redAccent[100],
+                  ),
+                  title: Text(
+                    'More Information',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              MaterialButton(
+                color: Color(0xff374972),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
                     builder: (context) => CoronaMaps(
                       resultData: info,
                     ),
@@ -269,7 +337,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             Text('Corona Tracker'),
             Text(
-              '${info.length} Places',
+              '${info.length == 0 ? 'Loading' : info.length} Places',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 15,
@@ -280,15 +348,13 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         centerTitle: true,
         backgroundColor: Color(0xff1d2c4d),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: () {
-              getCountries();
-              //getMarkers.cancel();
-            },
-          )
-        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: getCountries,
+        backgroundColor: Color(0xff375087),
+        child: Icon(
+          Icons.refresh,
+        ),
       ),
       backgroundColor: Color(0xff375087),
       body: loading
@@ -313,138 +379,148 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
             )
-          : ListView.builder(
-              itemCount: info.length,
+          : ListView(
               physics: BouncingScrollPhysics(),
-              itemBuilder: (context, i) {
-                return Container(
-                  margin: EdgeInsets.all(10),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 10.0,
-                    vertical: 10.0,
-                  ),
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Color(0xff1d2c4d),
-                    borderRadius: BorderRadius.circular(5),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black45,
-                        blurRadius: 10.0,
-                      )
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Text(
-                            '${info[i].country}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontSize: 20.0,
+              children: <Widget>[
+                Text('Title'),
+                Column(
+                  children: List.generate(
+                    info.length,
+                    (i) {
+                      return Container(
+                        margin: EdgeInsets.all(10),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10.0,
+                          vertical: 10.0,
+                        ),
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Color(0xff1d2c4d),
+                          borderRadius: BorderRadius.circular(5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black45,
+                              blurRadius: 10.0,
+                            )
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  '${info[i].country}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    fontSize: 20.0,
+                                  ),
+                                ),
+                                Column(
+                                  children: <Widget>[
+                                    Text(
+                                      '${info[i].newCases}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        color: info[i].newCases == 'NO'
+                                            ? Colors.greenAccent
+                                            : int.parse(info[i]
+                                                        .newCases
+                                                        .replaceFirst('+', '')
+                                                        .replaceAll(',', '')) >=
+                                                    10
+                                                ? Colors.amber
+                                                : Colors.orange,
+                                      ),
+                                    ),
+                                    Text(
+                                      'New Cases',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 10.0,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ],
                             ),
-                          ),
-                          Column(
-                            children: <Widget>[
-                              Text(
-                                '${info[i].newCases}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                  color: info[i].newCases == 'NO'
-                                      ? Colors.greenAccent
-                                      : int.parse(info[i]
-                                                  .newCases
-                                                  .replaceFirst('+', '')
-                                                  .replaceAll(',', '')) >=
-                                              10
-                                          ? Colors.amber
-                                          : Colors.orange,
+                            SizedBox(
+                              height: 10.0,
+                            ),
+                            Column(
+                              children: <Widget>[
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: <Widget>[
+                                    TotalCases(
+                                      data: info[i].totalCases,
+                                      type: 'Total Cases',
+                                      dataSize: 20,
+                                      textSize: 12,
+                                      isMaps: false,
+                                    ),
+                                    TotalDeaths(
+                                      data: info[i].totalDeaths,
+                                      type: 'Total Deaths',
+                                      dataSize: 20,
+                                      textSize: 12,
+                                      isMaps: false,
+                                    ),
+                                    NewDeaths(
+                                      data: info[i].newDeaths,
+                                      type: 'New Deaths',
+                                      dataSize: 20,
+                                      textSize: 12,
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              Text(
-                                'New Cases',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 10.0,
-                                  color: Colors.white,
+                                SizedBox(
+                                  height: 10.0,
                                 ),
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      Column(
-                        children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: <Widget>[
-                              TotalCases(
-                                data: info[i].totalCases,
-                                type: 'Total \nCases',
-                                dataSize: 20,
-                                textSize: 12,
-                              ),
-                              TotalDeaths(
-                                data: info[i].totalDeaths,
-                                type: 'Total \nDeaths',
-                                dataSize: 20,
-                                textSize: 12,
-                              ),
-                              NewDeaths(
-                                data: info[i].newDeaths,
-                                type: 'New \n Deaths',
-                                dataSize: 20,
-                                textSize: 12,
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                          Row(
-                            children: <Widget>[
-                              TotalRecovered(
-                                data: info[i].totalRecovered,
-                                type: 'Total Recovered',
-                                dataSize: 20,
-                                textSize: 15,
-                              ),
-                              ActiveCases(
-                                data: info[i].activeCases,
-                                type: 'Active Cases',
-                                dataSize: 20,
-                                textSize: 15,
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                          Row(
-                            children: <Widget>[
-                              SeriousCritical(
-                                data: info[i].seriousCritical,
-                                type: 'Serious, Critical',
-                                dataSize: 25,
-                                textSize: 15,
-                                isRow: false,
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                    ],
+                                Row(
+                                  children: <Widget>[
+                                    TotalRecovered(
+                                      data: info[i].totalRecovered,
+                                      type: 'Total Recovered',
+                                      dataSize: 20,
+                                      textSize: 15,
+                                    ),
+                                    ActiveCases(
+                                      data: info[i].activeCases,
+                                      type: 'Active Cases',
+                                      dataSize: 20,
+                                      textSize: 15,
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 10.0,
+                                ),
+                                Row(
+                                  children: <Widget>[
+                                    SeriousCritical(
+                                      data: info[i].seriousCritical,
+                                      type: 'Serious, Critical',
+                                      dataSize: 25,
+                                      textSize: 15,
+                                      isRow: false,
+                                    )
+                                  ],
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
+                )
+              ],
             ),
     );
   }

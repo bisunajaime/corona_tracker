@@ -5,12 +5,14 @@ class TotalCases extends StatelessWidget {
   final String type;
   final double dataSize;
   final double textSize;
+  final bool isMaps;
 
   TotalCases({
     this.data,
     this.type,
     this.dataSize,
     this.textSize,
+    this.isMaps,
   });
 
   @override
@@ -21,7 +23,7 @@ class TotalCases extends StatelessWidget {
           horizontal: 5.0,
         ),
         padding: EdgeInsets.symmetric(
-          vertical: 10.0,
+          vertical: 15.0,
         ),
         decoration: BoxDecoration(
           color: Color(0xff131C2F),
@@ -41,14 +43,15 @@ class TotalCases extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 fontSize: dataSize,
                 color: data == 'NONE' || data == 'NO'
-                    ? Colors.greenAccent[100]
+                    ? Colors.blueAccent
                     : int.parse(data.replaceAll(',', '').toString()) >= 10
                         ? Colors.pinkAccent[100]
                         : Colors.greenAccent[100],
               ),
             ),
             SizedBox(
-              height: 5.0,
+              width: isMaps ? 0.0 : 10.0,
+              height: isMaps ? 0.0 : 5.0,
             ),
             Text(
               '$type',

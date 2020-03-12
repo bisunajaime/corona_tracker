@@ -5,12 +5,14 @@ class TotalDeaths extends StatelessWidget {
   final String type;
   final double dataSize;
   final double textSize;
+  final bool isMaps;
 
   TotalDeaths({
     this.data,
     this.type,
     this.dataSize,
     this.textSize,
+    this.isMaps,
   });
 
   @override
@@ -21,7 +23,7 @@ class TotalDeaths extends StatelessWidget {
           horizontal: 5.0,
         ),
         padding: EdgeInsets.symmetric(
-          vertical: 10.0,
+          vertical: 15.0,
         ),
         decoration: BoxDecoration(
           color: Color(0xff131C2F),
@@ -48,7 +50,8 @@ class TotalDeaths extends StatelessWidget {
               ),
             ),
             SizedBox(
-              height: 5.0,
+              width: isMaps ? 0.0 : 10.0,
+              height: isMaps ? 0.0 : 5.0,
             ),
             Text(
               '$type',

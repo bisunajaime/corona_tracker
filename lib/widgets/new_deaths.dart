@@ -21,7 +21,7 @@ class NewDeaths extends StatelessWidget {
           horizontal: 5.0,
         ),
         padding: EdgeInsets.symmetric(
-          vertical: 10.0,
+          vertical: 15.0,
         ),
         decoration: BoxDecoration(
           color: Color(0xff131C2F),

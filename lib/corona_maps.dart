@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:coronatracker/main.dart';
 import 'package:coronatracker/widgets/active_cases.dart';
 import 'package:coronatracker/widgets/new_deaths.dart';
 import 'package:coronatracker/widgets/serious_critical.dart';
@@ -48,7 +47,7 @@ class _CoronaMapsState extends State<CoronaMaps> {
   int counter = 0;
   GoogleMapController _mapController;
 
-  getMarkers(Results data) async {
+  Future getMarkers(Results data) async {
     try {
       List<Placemark> placemarks = await Geolocator().placemarkFromAddress(
           '${data.country == 'S. Korea' ? data.country.replaceAll('S. ', '') : data.country}');
@@ -88,6 +87,7 @@ class _CoronaMapsState extends State<CoronaMaps> {
       setState(() {
         newMarkers[MarkerId(data.country)] = theMarker;
       });
+      print(markers.length);
     } catch (e) {
       print('<< $e >>;');
     }
@@ -98,29 +98,17 @@ class _CoronaMapsState extends State<CoronaMaps> {
     setState(() {
       loading = true;
     });
-    load = Timer.periodic(Duration(seconds: 3), (d) {
-      setState(() {
-        loading = false;
-      });
-      d.cancel();
-    });
-    List x =
-        widget.resultData.map((data) async => await getMarkers(data)).toList();
-    print(newMarkers.length);
-  }
 
-  _showMarkerInfo(BuildContext context) {
-    showBottomSheet(
-      context: context,
-      builder: (context) {
-        return Text('Hello World');
-      },
-    );
+    widget.resultData.map((data) async => await getMarkers(data)).toList();
+
+    setState(() {
+      loading = false;
+    });
+    print(newMarkers.length);
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     rootBundle.loadString('assets/maps/dark_maps.txt').then((string) {
       mapStyle = string;
@@ -133,7 +121,6 @@ class _CoronaMapsState extends State<CoronaMaps> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     load.cancel();
     markers.clear();
     super.dispose();
@@ -141,6 +128,7 @@ class _CoronaMapsState extends State<CoronaMaps> {
 
   @override
   Widget build(BuildContext context) {
+    Color lightBlue = Color(0xff203053);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xff1d2c4d),
@@ -208,7 +196,7 @@ class _CoronaMapsState extends State<CoronaMaps> {
                     flex: 2,
                     child: Container(
                       width: double.infinity,
-                      color: Color(0xff10182B),
+                      color: lightBlue,
                       margin: EdgeInsets.symmetric(
                         vertical: 0.0,
                       ),
@@ -229,6 +217,7 @@ class _CoronaMapsState extends State<CoronaMaps> {
                                       Icon(
                                         Icons.location_on,
                                         color: Colors.red,
+                                        size: 30.0,
                                       ),
                                       SizedBox(
                                         width: 10.0,
@@ -244,74 +233,72 @@ class _CoronaMapsState extends State<CoronaMaps> {
                                     ],
                                   ),
                                 ),
-                                tappedText.totalCases == '0'
-                                    ? SizedBox()
-                                    : Expanded(
-                                        flex: 4,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: <Widget>[
-                                            Row(
-                                              children: <Widget>[
-                                                TotalCases(
-                                                  data: tappedText.totalCases,
-                                                  type: 'Total Cases',
-                                                  dataSize: 20,
-                                                  textSize: 12,
-                                                ),
-                                                TotalRecovered(
-                                                  data:
-                                                      tappedText.totalRecovered,
-                                                  type: 'Total Recovered',
-                                                  dataSize: 20,
-                                                  textSize: 12,
-                                                ),
-                                                ActiveCases(
-                                                  data: tappedText.activeCases,
-                                                  type: 'Active Cases',
-                                                  dataSize: 20,
-                                                  textSize: 12,
-                                                ),
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 5,
-                                            ),
-                                            Row(
-                                              children: <Widget>[
-                                                TotalDeaths(
-                                                  data: tappedText.totalDeaths,
-                                                  type: 'Total Deaths',
-                                                  dataSize: 20,
-                                                  textSize: 12,
-                                                ),
-                                                NewDeaths(
-                                                  data: tappedText.newDeaths,
-                                                  type: 'New Deaths',
-                                                  dataSize: 20,
-                                                  textSize: 12,
-                                                )
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 5,
-                                            ),
-                                            Row(
-                                              children: <Widget>[
-                                                SeriousCritical(
-                                                  data: tappedText
-                                                      .seriousCritical,
-                                                  type: 'Serious, Critical: ',
-                                                  dataSize: 15,
-                                                  textSize: 15,
-                                                  isRow: true,
-                                                ),
-                                              ],
-                                            )
-                                          ],
-                                        ),
+                                Expanded(
+                                  flex: 4,
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: <Widget>[
+                                      Row(
+                                        children: <Widget>[
+                                          TotalCases(
+                                            data: tappedText.totalCases,
+                                            type: 'Total Cases',
+                                            dataSize: 20,
+                                            textSize: 12,
+                                            isMaps: true,
+                                          ),
+                                          TotalRecovered(
+                                            data: tappedText.totalRecovered,
+                                            type: 'Total Recovered',
+                                            dataSize: 20,
+                                            textSize: 12,
+                                          ),
+                                          ActiveCases(
+                                            data: tappedText.activeCases,
+                                            type: 'Active Cases',
+                                            dataSize: 20,
+                                            textSize: 12,
+                                          ),
+                                        ],
                                       ),
+                                      SizedBox(
+                                        height: 5,
+                                      ),
+                                      Row(
+                                        children: <Widget>[
+                                          TotalDeaths(
+                                            data: tappedText.totalDeaths,
+                                            type: 'Total Deaths',
+                                            dataSize: 20,
+                                            textSize: 12,
+                                            isMaps: true,
+                                          ),
+                                          NewDeaths(
+                                            data: tappedText.newDeaths,
+                                            type: 'New Deaths',
+                                            dataSize: 20,
+                                            textSize: 12,
+                                          )
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        height: 5,
+                                      ),
+                                      Row(
+                                        children: <Widget>[
+                                          SeriousCritical(
+                                            data: tappedText.seriousCritical,
+                                            type: 'Serious, Critical: ',
+                                            dataSize: 15,
+                                            textSize: 15,
+                                            isRow: true,
+                                          ),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           )
@@ -325,181 +312,3 @@ class _CoronaMapsState extends State<CoronaMaps> {
     );
   }
 }
-
-//child: ListView(
-//scrollDirection: Axis.horizontal,
-//physics: BouncingScrollPhysics(),
-//children: <Widget>[
-//Container(
-//alignment: Alignment.center,
-//decoration: BoxDecoration(
-//color: Color(0xff162138),
-//borderRadius:
-//BorderRadius.circular(5),
-//),
-//margin: EdgeInsets.symmetric(
-//vertical: 15.0,
-//horizontal: 5.0,
-//),
-//padding: EdgeInsets.symmetric(
-//horizontal: 15.0,
-//),
-//child: Text(
-//'${tappedText.totalCases}\nTotal Cases',
-//textAlign: TextAlign.center,
-//style: TextStyle(
-//color: tappedText.totalCases ==
-//'NONE' ||
-//tappedText.totalCases ==
-//'NO'
-//? Colors.greenAccent[100]
-//: int.parse(tappedText
-//    .totalCases
-//    .replaceAll(',', '')
-//.toString()) >=
-//10
-//? Colors.pink[400]
-//: Colors.greenAccent[100],
-//fontWeight: FontWeight.bold,
-//fontSize: 20.0,
-//),
-//),
-//),
-//Container(
-//alignment: Alignment.center,
-//decoration: BoxDecoration(
-//color: Color(0xff162138),
-//borderRadius:
-//BorderRadius.circular(5),
-//),
-//margin: EdgeInsets.symmetric(
-//vertical: 15.0,
-//horizontal: 5.0,
-//),
-//padding: EdgeInsets.symmetric(
-//horizontal: 15.0,
-//),
-//child: Text(
-//'${tappedText.newCases}\nNew Cases',
-//textAlign: TextAlign.center,
-//style: TextStyle(
-//color: tappedText.newCases ==
-//'NONE' ||
-//tappedText.newCases == 'NO'
-//? Colors.greenAccent[100]
-//: int.parse(tappedText.newCases
-//    .replaceAll(',', '')
-//.toString()) >=
-//10
-//? Colors.red[300]
-//: Colors.yellow[300],
-//fontWeight: FontWeight.bold,
-//fontSize: 20.0,
-//),
-//),
-//),
-//Container(
-//alignment: Alignment.center,
-//decoration: BoxDecoration(
-//color: Color(0xff162138),
-//borderRadius:
-//BorderRadius.circular(5),
-//),
-//margin: EdgeInsets.symmetric(
-//vertical: 15.0,
-//horizontal: 5.0,
-//),
-//padding: EdgeInsets.symmetric(
-//horizontal: 15.0,
-//),
-//child: Text(
-//'${tappedText.totalRecovered}\nTotal Recovered',
-//textAlign: TextAlign.center,
-//style: TextStyle(
-//color: tappedText.totalRecovered ==
-//'NONE' ||
-//tappedText.totalRecovered ==
-//'NO'
-//? Colors.blue
-//    : int.parse(tappedText
-//    .totalRecovered
-//    .replaceAll(',', '')
-//.toString()) >=
-//10
-//? Colors.greenAccent[100]
-//: Colors.red[300],
-//fontWeight: FontWeight.bold,
-//fontSize: 20.0,
-//),
-//),
-//),
-//Container(
-//alignment: Alignment.center,
-//decoration: BoxDecoration(
-//color: Color(0xff162138),
-//borderRadius:
-//BorderRadius.circular(5),
-//),
-//margin: EdgeInsets.symmetric(
-//vertical: 15.0,
-//horizontal: 5.0,
-//),
-//padding: EdgeInsets.symmetric(
-//horizontal: 15.0,
-//),
-//child: Text(
-//'${tappedText.totalDeaths}\nTotal Deaths',
-//textAlign: TextAlign.center,
-//style: TextStyle(
-//color: tappedText.totalDeaths ==
-//'NONE' ||
-//tappedText.totalDeaths ==
-//'NO'
-//? Colors.blue
-//    : int.parse(tappedText
-//    .totalDeaths
-//    .replaceAll(',', '')
-//.toString()) >=
-//50
-//? Colors.red[300]
-//: Colors.purpleAccent[100],
-//fontWeight: FontWeight.bold,
-//fontSize: 20.0,
-//),
-//),
-//),
-//Container(
-//alignment: Alignment.center,
-//decoration: BoxDecoration(
-//color: Color(0xff162138),
-//borderRadius:
-//BorderRadius.circular(5),
-//),
-//margin: EdgeInsets.symmetric(
-//vertical: 15.0,
-//horizontal: 5.0,
-//),
-//padding: EdgeInsets.symmetric(
-//horizontal: 15.0,
-//),
-//child: Text(
-//'${tappedText.newDeaths}\nNew Deaths',
-//textAlign: TextAlign.center,
-//style: TextStyle(
-//color: tappedText.newDeaths ==
-//'NONE' ||
-//tappedText.newDeaths == 'NO'
-//? Colors.blue
-//    : int.parse(tappedText.newDeaths
-//    .replaceAll(',', '')
-//.toString()) >=
-//10
-//? Colors.red[300]
-//: Colors.purpleAccent[100],
-//fontWeight: FontWeight.bold,
-//fontSize: 20.0,
-//),
-//),
-//),
-//],
-//),
