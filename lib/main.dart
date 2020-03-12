@@ -1,10 +1,18 @@
 import 'dart:async';
 
 import 'package:coronatracker/corona_maps.dart';
+import 'package:coronatracker/widgets/active_cases.dart';
+import 'package:coronatracker/widgets/new_deaths.dart';
+import 'package:coronatracker/widgets/serious_critical.dart';
+import 'package:coronatracker/widgets/total_cases.dart';
+import 'package:coronatracker/widgets/total_deaths.dart';
+import 'package:coronatracker/widgets/total_recovered.dart';
 import 'package:flutter/material.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
+
+import 'models/results.dart';
 
 void main() => runApp(MyApp());
 
@@ -35,6 +43,8 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> totalDeathsList = [];
   List<String> newDeathsList = [];
   List<String> totalRecovered = [];
+  List<String> activeCasesList = [];
+  List<String> seriousCriticalList = [];
 
   Map<String, dynamic> results = {};
   List<Map<String, dynamic>> data = [];
@@ -58,6 +68,8 @@ class _MyHomePageState extends State<MyHomePage> {
       newDeathsList.clear();
       totalRecovered.clear();
       newCasesList.clear();
+      activeCasesList.clear();
+      seriousCriticalList.clear();
     });
 
     Timer(Duration(seconds: 5), () {
@@ -121,6 +133,22 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }
 
+    for (int x = 6; x < totalCases.length; x += 9) {
+      if (totalCases[x].innerHtml.trim().length != 0) {
+        activeCasesList.add(totalCases[x].innerHtml.trim());
+      } else {
+        activeCasesList.add('NONE');
+      }
+    }
+
+    for (int x = 7; x < totalCases.length; x += 9) {
+      if (totalCases[x].innerHtml.trim().length != 0) {
+        seriousCriticalList.add(totalCases[x].innerHtml.trim());
+      } else {
+        seriousCriticalList.add('NONE');
+      }
+    }
+
     // remove total tr
     countriesList.removeLast();
     totalCasesList.removeLast();
@@ -128,6 +156,8 @@ class _MyHomePageState extends State<MyHomePage> {
     newDeathsList.removeLast();
     totalRecovered.removeLast();
     newCasesList.removeLast();
+    activeCasesList.removeLast();
+    seriousCriticalList.removeLast();
 
     for (int i = 0; i < countriesList.length; i++) {
       data.add({
@@ -137,6 +167,8 @@ class _MyHomePageState extends State<MyHomePage> {
         'totalDeaths': totalDeathsList[i],
         'newDeaths': newDeathsList[i],
         'totalRecovered': totalRecovered[i],
+        'activeCases': activeCasesList[i],
+        'seriousCritical': seriousCriticalList[i],
       });
     }
 
@@ -239,6 +271,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               '${info.length} Places',
               style: TextStyle(
+                fontWeight: FontWeight.bold,
                 fontSize: 15,
                 color: Colors.cyanAccent,
               ),
@@ -373,279 +406,32 @@ class _MyHomePageState extends State<MyHomePage> {
                             children: <Widget>[
                               TotalRecovered(
                                 data: info[i].totalRecovered,
-                                type: 'Total Recovered:',
+                                type: 'Total Recovered',
+                              ),
+                              ActiveCases(
+                                data: info[i].activeCases,
+                                type: 'Active Cases',
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 10.0,
+                          ),
+                          Row(
+                            children: <Widget>[
+                              SeriousCritical(
+                                data: info[i].seriousCritical,
+                                type: 'Serious, Critical',
                               )
                             ],
                           )
                         ],
-                      )
+                      ),
                     ],
                   ),
                 );
               },
             ),
-    );
-  }
-}
-
-class TotalCases extends StatelessWidget {
-  final String data;
-  final String type;
-
-  TotalCases({this.data, this.type});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        margin: EdgeInsets.symmetric(
-          horizontal: 5.0,
-        ),
-        padding: EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          color: Color(0xff131C2F),
-          borderRadius: BorderRadius.circular(5),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black45,
-              blurRadius: 2.0,
-            ),
-          ],
-        ),
-        child: Column(
-          children: <Widget>[
-            Text(
-              '$data',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: data == 'NONE' || data == 'NO'
-                    ? Colors.greenAccent[100]
-                    : int.parse(data.replaceAll(',', '').toString()) >= 10
-                        ? Colors.pinkAccent[100]
-                        : Colors.greenAccent[100],
-              ),
-            ),
-            SizedBox(
-              height: 5.0,
-            ),
-            Text(
-              '$type',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
-          mainAxisAlignment: MainAxisAlignment.center,
-        ),
-      ),
-    );
-  }
-}
-
-class TotalDeaths extends StatelessWidget {
-  final String data;
-  final String type;
-
-  TotalDeaths({this.data, this.type});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        margin: EdgeInsets.symmetric(
-          horizontal: 5.0,
-        ),
-        padding: EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          color: Color(0xff131C2F),
-          borderRadius: BorderRadius.circular(5),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black45,
-              blurRadius: 2.0,
-            ),
-          ],
-        ),
-        child: Column(
-          children: <Widget>[
-            Text(
-              '$data',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: data == 'NONE' || data == 'NO'
-                    ? Colors.greenAccent
-                    : int.parse(data.replaceAll(',', '').toString()) >= 50
-                        ? Colors.redAccent[100]
-                        : Colors.purpleAccent[100],
-              ),
-            ),
-            SizedBox(
-              height: 5.0,
-            ),
-            Text(
-              '$type',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
-          mainAxisAlignment: MainAxisAlignment.center,
-        ),
-      ),
-    );
-  }
-}
-
-class NewDeaths extends StatelessWidget {
-  final String data;
-  final String type;
-
-  NewDeaths({this.data, this.type});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        margin: EdgeInsets.symmetric(
-          horizontal: 5.0,
-        ),
-        padding: EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          color: Color(0xff131C2F),
-          borderRadius: BorderRadius.circular(5),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black45,
-              blurRadius: 2.0,
-            ),
-          ],
-        ),
-        child: Column(
-          children: <Widget>[
-            Text(
-              '$data',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: data == 'NONE' || data == 'NO'
-                    ? Colors.greenAccent
-                    : int.parse(data.replaceAll(',', '').toString()) >= 10
-                        ? Colors.yellow
-                        : Colors.purpleAccent[100],
-              ),
-            ),
-            SizedBox(
-              height: 5.0,
-            ),
-            Text(
-              '$type',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
-          mainAxisAlignment: MainAxisAlignment.center,
-        ),
-      ),
-    );
-  }
-}
-
-class TotalRecovered extends StatelessWidget {
-  final String data;
-  final String type;
-
-  TotalRecovered({this.data, this.type});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        margin: EdgeInsets.symmetric(
-          horizontal: 5.0,
-        ),
-        padding: EdgeInsets.symmetric(
-          vertical: 15.0,
-        ),
-        decoration: BoxDecoration(
-          color: Color(0xff131C2F),
-          borderRadius: BorderRadius.circular(5),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black45,
-              blurRadius: 2.0,
-            ),
-          ],
-        ),
-        child: Row(
-          children: <Widget>[
-            Text(
-              '$type',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(
-              width: 10.0,
-            ),
-            Text(
-              '$data',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: data == 'NONE' || data == 'NO'
-                    ? Colors.blueAccent
-                    : int.parse(data.replaceAll(',', '').toString()) >= 10
-                        ? Colors.greenAccent[100]
-                        : Colors.redAccent[100],
-              ),
-            ),
-          ],
-          mainAxisAlignment: MainAxisAlignment.center,
-        ),
-      ),
-    );
-  }
-}
-
-class Results {
-  final String country;
-  final String totalCases;
-  final String newCases;
-  final String totalDeaths;
-  final String newDeaths;
-  final String totalRecovered;
-
-  Results(
-      {this.country,
-      this.totalCases,
-      this.newCases,
-      this.totalDeaths,
-      this.newDeaths,
-      this.totalRecovered});
-
-  factory Results.fromJson(Map<String, dynamic> json) {
-    return Results(
-      country: json['country'],
-      totalCases: json['totalCases'],
-      newCases: json['newCases'],
-      totalDeaths: json['totalDeaths'],
-      newDeaths: json['newDeaths'],
-      totalRecovered: json['totalRecovered'],
     );
   }
 }
