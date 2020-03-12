@@ -273,7 +273,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 12.0,
+                      fontSize: 20.0,
+                      color: Colors.white,
                     ),
                   )
                 ],
