@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:coronatracker/corona_maps.dart';
 import 'package:coronatracker/more_info.dart';
 import 'package:coronatracker/widgets/active_cases.dart';
 import 'package:coronatracker/widgets/new_deaths.dart';
@@ -10,6 +8,8 @@ import 'package:coronatracker/widgets/total_cases.dart';
 import 'package:coronatracker/widgets/total_deaths.dart';
 import 'package:coronatracker/widgets/total_recovered.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
@@ -51,8 +51,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Map<String, dynamic> results = {};
   Map<String, dynamic> moreRes = {};
+  Map<MarkerId, Marker> newMarkers = <MarkerId, Marker>{};
   List<Map<String, dynamic>> data = [];
-  List<Results> info = [];
+
+  List<Country> country = [];
   MoreResults moreResults;
 
   bool loading = true;
@@ -65,8 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // clear when reload
       loading = true;
       showReloadMsg = false;
-      info.clear();
-      data.clear();
+      country.clear();
       countriesList.clear();
       totalCasesList.clear();
       totalDeathsList.clear();
@@ -187,42 +188,51 @@ class _MyHomePageState extends State<MyHomePage> {
     activeCasesList.removeLast();
     seriousCriticalList.removeLast();
 
-    for (int i = 0; i < countriesList.length; i++) {
-      data.add({
-        'country': countriesList[i],
-        'totalCases': totalCasesList[i],
-        'newCases': newCasesList[i],
-        'totalDeaths': totalDeathsList[i],
-        'newDeaths': newDeathsList[i],
-        'totalRecovered': totalRecovered[i],
-        'activeCases': activeCasesList[i],
-        'seriousCritical': seriousCriticalList[i],
-      });
-    }
     Map<String, dynamic> countryJsonData = {};
     for (int i = 0; i < countriesList.length; i++) {
-      countryJsonData['${countriesList[i]}'] = {
-        'totalCases': totalCasesList[i],
-        'newCases': newCasesList[i],
-        'totalDeaths': totalDeathsList[i],
-        'newDeaths': newDeathsList[i],
-        'totalRecovered': totalRecovered[i],
-        'activeCases': activeCasesList[i],
-        'seriousCritical': seriousCriticalList[i],
+      countryJsonData['id_$i'] = {
+        'countryName': countriesList[i],
+        'info': {
+          'totalCases': totalCasesList[i],
+          'newCases': newCasesList[i],
+          'totalDeaths': totalDeathsList[i],
+          'newDeaths': newDeathsList[i],
+          'totalRecovered': totalRecovered[i],
+          'activeCases': activeCasesList[i],
+          'seriousCritical': seriousCriticalList[i],
+        }
       };
+      country.add(Country.fromJson(countryJsonData['id_$i']));
     }
 
     jsonCountryData.add(countryJsonData);
-    var s = jsonCountryData.map((f) {
-      return f['totalCases'];
-    });
-
-    print(s);
-    info = data.map((res) => Results.fromJson(res)).toList();
 
     setState(() {
       loading = false;
       showReloadMsg = false;
+    });
+  }
+
+  loadMarkers() {
+    country.forEach((c) async {
+      setState(() {
+        loading = true;
+      });
+      List<Placemark> placemark = await Geolocator()
+          .placemarkFromAddress(c.countryName)
+          .asStream()
+          .toList()
+          .then((x) {
+        print('p');
+        return x[0];
+      }).whenComplete(() {
+        print('compleet');
+      });
+      print('${placemark[0].country} passed');
+    });
+
+    setState(() {
+      loading = false;
     });
   }
 
@@ -270,7 +280,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         height: 10,
                       ),
                       Text(
-                        '${info.length} \nAffected Places',
+                        '${country.length} \nAffected Places',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
@@ -307,21 +317,16 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               MaterialButton(
                 color: Color(0xff374972),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CoronaMaps(
-                      resultData: info,
-                    ),
-                  ),
-                ),
+                onPressed: () {
+                  loadMarkers();
+                },
                 child: ListTile(
                   leading: Icon(
                     Icons.location_on,
                     color: Colors.yellow,
                   ),
                   title: Text(
-                    'Corona Maps',
+                    'Load Markers',
                     style: TextStyle(
                       color: Colors.white,
                     ),
@@ -337,7 +342,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             Text('Corona Tracker'),
             Text(
-              '${info.length == 0 ? 'Loading' : info.length} Places',
+              '${country.length == 0 ? 'Loading' : country.length} Places',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 15,
@@ -385,8 +390,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 Text('Title'),
                 Column(
                   children: List.generate(
-                    info.length,
+                    country.length,
                     (i) {
+                      Country c = country[i];
                       return Container(
                         margin: EdgeInsets.all(10),
                         padding: EdgeInsets.symmetric(
@@ -411,7 +417,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
                                 Text(
-                                  '${info[i].country}',
+                                  '${c.countryName}',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
@@ -421,14 +427,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                 Column(
                                   children: <Widget>[
                                     Text(
-                                      '${info[i].newCases}',
+                                      '${c.info.newCases}',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 20,
-                                        color: info[i].newCases == 'NO'
+                                        color: c.info.newCases == 'NO'
                                             ? Colors.greenAccent
-                                            : int.parse(info[i]
-                                                        .newCases
+                                            : int.parse(c.info.newCases
                                                         .replaceFirst('+', '')
                                                         .replaceAll(',', '')) >=
                                                     10
@@ -458,21 +463,21 @@ class _MyHomePageState extends State<MyHomePage> {
                                       MainAxisAlignment.spaceEvenly,
                                   children: <Widget>[
                                     TotalCases(
-                                      data: info[i].totalCases,
+                                      data: c.info.totalCases,
                                       type: 'Total Cases',
                                       dataSize: 20,
                                       textSize: 12,
                                       isMaps: false,
                                     ),
                                     TotalDeaths(
-                                      data: info[i].totalDeaths,
+                                      data: c.info.totalDeaths,
                                       type: 'Total Deaths',
                                       dataSize: 20,
                                       textSize: 12,
                                       isMaps: false,
                                     ),
                                     NewDeaths(
-                                      data: info[i].newDeaths,
+                                      data: c.info.newDeaths,
                                       type: 'New Deaths',
                                       dataSize: 20,
                                       textSize: 12,
@@ -485,13 +490,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                 Row(
                                   children: <Widget>[
                                     TotalRecovered(
-                                      data: info[i].totalRecovered,
+                                      data: c.info.totalRecovered,
                                       type: 'Total Recovered',
                                       dataSize: 20,
                                       textSize: 15,
                                     ),
                                     ActiveCases(
-                                      data: info[i].activeCases,
+                                      data: c.info.activeCases,
                                       type: 'Active Cases',
                                       dataSize: 20,
                                       textSize: 15,
@@ -504,7 +509,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 Row(
                                   children: <Widget>[
                                     SeriousCritical(
-                                      data: info[i].seriousCritical,
+                                      data: c.info.seriousCritical,
                                       type: 'Serious, Critical',
                                       dataSize: 25,
                                       textSize: 15,

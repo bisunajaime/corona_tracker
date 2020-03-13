@@ -14,9 +14,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'models/results.dart';
 
 class CoronaMaps extends StatefulWidget {
-  final List<Results> resultData;
+  final List<Country> resultData;
+  final Set<Marker> markerSet;
 
-  CoronaMaps({this.resultData});
+  CoronaMaps({this.resultData, this.markerSet});
 
   @override
   _CoronaMapsState createState() => _CoronaMapsState();
@@ -28,15 +29,17 @@ class _CoronaMapsState extends State<CoronaMaps> {
 
   // new markers
   Map<MarkerId, Marker> newMarkers = <MarkerId, Marker>{};
-  Results tappedText = Results(
-    country: 'Select a Marker',
-    newCases: '0',
-    newDeaths: '0',
-    totalCases: '0',
-    totalDeaths: '0',
-    totalRecovered: '0',
-    activeCases: '0',
-    seriousCritical: 'NONE',
+  Country tappedText = Country(
+    countryName: 'Select a Marker',
+    info: CountryInfo(
+      newCases: '0',
+      newDeaths: '0',
+      totalCases: '0',
+      totalDeaths: '0',
+      totalRecovered: '0',
+      activeCases: '0',
+      seriousCritical: 'NONE',
+    ),
   );
   LatLng tappedPos;
   double tapZoom = 4.0;
@@ -47,20 +50,20 @@ class _CoronaMapsState extends State<CoronaMaps> {
   int counter = 0;
   GoogleMapController _mapController;
 
-  Future getMarkers(Results data) async {
+  Future getMarkers(Country data) async {
     try {
       List<Placemark> placemarks = await Geolocator().placemarkFromAddress(
-          '${data.country == 'S. Korea' ? data.country.replaceAll('S. ', '') : data.country}');
+          '${data.countryName == 'S. Korea' ? data.countryName.replaceAll('S. ', '') : data.countryName}');
       Placemark thePlacemark = placemarks.first;
       Marker theMarker = Marker(
-        markerId: MarkerId(data.country),
+        markerId: MarkerId(data.countryName),
         position: LatLng(
             thePlacemark.position.latitude, thePlacemark.position.longitude),
         consumeTapEvents: true,
         infoWindow: InfoWindow(
           anchor: Offset(10.0, 10.0),
-          title: data.country,
-          snippet: data.totalCases,
+          title: data.countryName,
+          snippet: data.info.totalCases,
           onTap: () {
             print('tapped');
           },
@@ -85,7 +88,7 @@ class _CoronaMapsState extends State<CoronaMaps> {
       );
 
       setState(() {
-        newMarkers[MarkerId(data.country)] = theMarker;
+        newMarkers[MarkerId(data.countryName)] = theMarker;
       });
       print(markers.length);
     } catch (e) {
@@ -223,7 +226,7 @@ class _CoronaMapsState extends State<CoronaMaps> {
                                         width: 10.0,
                                       ),
                                       Text(
-                                        '${tappedText.country}',
+                                        '${tappedText.countryName}',
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
@@ -242,20 +245,21 @@ class _CoronaMapsState extends State<CoronaMaps> {
                                       Row(
                                         children: <Widget>[
                                           TotalCases(
-                                            data: tappedText.totalCases,
+                                            data: tappedText.info.totalCases,
                                             type: 'Total Cases',
                                             dataSize: 20,
                                             textSize: 12,
                                             isMaps: true,
                                           ),
                                           TotalRecovered(
-                                            data: tappedText.totalRecovered,
+                                            data:
+                                                tappedText.info.totalRecovered,
                                             type: 'Total Recovered',
                                             dataSize: 20,
                                             textSize: 12,
                                           ),
                                           ActiveCases(
-                                            data: tappedText.activeCases,
+                                            data: tappedText.info.activeCases,
                                             type: 'Active Cases',
                                             dataSize: 20,
                                             textSize: 12,
@@ -268,14 +272,14 @@ class _CoronaMapsState extends State<CoronaMaps> {
                                       Row(
                                         children: <Widget>[
                                           TotalDeaths(
-                                            data: tappedText.totalDeaths,
+                                            data: tappedText.info.totalDeaths,
                                             type: 'Total Deaths',
                                             dataSize: 20,
                                             textSize: 12,
                                             isMaps: true,
                                           ),
                                           NewDeaths(
-                                            data: tappedText.newDeaths,
+                                            data: tappedText.info.newDeaths,
                                             type: 'New Deaths',
                                             dataSize: 20,
                                             textSize: 12,
@@ -288,7 +292,8 @@ class _CoronaMapsState extends State<CoronaMaps> {
                                       Row(
                                         children: <Widget>[
                                           SeriousCritical(
-                                            data: tappedText.seriousCritical,
+                                            data:
+                                                tappedText.info.seriousCritical,
                                             type: 'Serious, Critical: ',
                                             dataSize: 15,
                                             textSize: 15,

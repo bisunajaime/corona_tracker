@@ -1,5 +1,53 @@
-class Results {
-  final String country;
+//class Results {
+//  final String country;
+//  final String totalCases;
+//  final String newCases;
+//  final String totalDeaths;
+//  final String newDeaths;
+//  final String totalRecovered;
+//  final String activeCases;
+//  final String seriousCritical;
+//
+//  Results({
+//    this.country,
+//    this.totalCases,
+//    this.newCases,
+//    this.totalDeaths,
+//    this.newDeaths,
+//    this.totalRecovered,
+//    this.activeCases,
+//    this.seriousCritical,
+//  });
+//
+//  factory Results.fromJson(Map<String, dynamic> json) {
+//    return Results(
+//      country: json['country'],
+//      totalCases: json['totalCases'],
+//      newCases: json['newCases'],
+//      totalDeaths: json['totalDeaths'],
+//      newDeaths: json['newDeaths'],
+//      totalRecovered: json['totalRecovered'],
+//      activeCases: json['activeCases'],
+//      seriousCritical: json['seriousCritical'],
+//    );
+//  }
+//}
+
+class Country {
+  final String countryName;
+  final CountryInfo info;
+
+  Country({this.countryName, this.info});
+
+  factory Country.fromJson(Map<String, dynamic> json) {
+    return Country(
+      countryName: json['countryName'],
+      info: CountryInfo.fromJson(json['info']),
+    );
+  }
+}
+
+class CountryInfo {
   final String totalCases;
   final String newCases;
   final String totalDeaths;
@@ -8,8 +56,7 @@ class Results {
   final String activeCases;
   final String seriousCritical;
 
-  Results({
-    this.country,
+  CountryInfo({
     this.totalCases,
     this.newCases,
     this.totalDeaths,
@@ -19,9 +66,8 @@ class Results {
     this.seriousCritical,
   });
 
-  factory Results.fromJson(Map<String, dynamic> json) {
-    return Results(
-      country: json['country'],
+  factory CountryInfo.fromJson(Map<String, dynamic> json) {
+    return CountryInfo(
       totalCases: json['totalCases'],
       newCases: json['newCases'],
       totalDeaths: json['totalDeaths'],

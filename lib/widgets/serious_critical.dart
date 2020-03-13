@@ -19,9 +19,15 @@ class SeriousCritical extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        margin: EdgeInsets.symmetric(
-          horizontal: isRow ? 20.0 : 5.0,
-        ),
+        margin: isRow
+            ? EdgeInsets.only(
+                bottom: 10.0,
+                left: 15.0,
+                right: 15.0,
+              )
+            : EdgeInsets.symmetric(
+                horizontal: isRow ? 20.0 : 5.0,
+              ),
         padding: EdgeInsets.symmetric(
           vertical: isRow ? 15.0 : 10,
         ),
