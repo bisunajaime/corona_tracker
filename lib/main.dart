@@ -8,11 +8,13 @@ import 'package:coronatracker/widgets/total_cases.dart';
 import 'package:coronatracker/widgets/total_deaths.dart';
 import 'package:coronatracker/widgets/total_recovered.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
+import 'package:retry/retry.dart';
 
 import 'models/results.dart';
 
@@ -59,6 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   bool loading = true;
   bool showReloadMsg = false;
+  bool showMapLoading = false;
 
   Timer getMarkers;
 
@@ -214,25 +217,38 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   loadMarkers() {
-    country.forEach((c) async {
-      setState(() {
-        loading = true;
+    try {
+      country.forEach((c) async {
+        setState(() {
+          showMapLoading = true;
+        });
+        List<Placemark> placemark = await retry(
+          () => Geolocator()
+              .placemarkFromAddress(c.countryName)
+              .asStream()
+              .toList()
+              .then((x) {
+            print('p');
+            return x[0];
+          }),
+          delayFactor: Duration(seconds: 1),
+          maxAttempts: 3,
+          maxDelay: Duration(seconds: 2),
+          onRetry: (e) {
+            print(e);
+            print('!!!!!');
+          },
+          retryIf: (e) => e is PlatformException,
+        );
       });
-      List<Placemark> placemark = await Geolocator()
-          .placemarkFromAddress(c.countryName)
-          .asStream()
-          .toList()
-          .then((x) {
-        print('p');
-        return x[0];
-      }).whenComplete(() {
-        print('compleet');
-      });
-      print('${placemark[0].country} passed');
-    });
+    } catch (e) {
+      print(e);
+    }
 
-    setState(() {
-      loading = false;
+    Timer(Duration(seconds: 2), () {
+      setState(() {
+        showMapLoading = false;
+      });
     });
   }
 
@@ -315,24 +331,33 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               ),
-              MaterialButton(
-                color: Color(0xff374972),
-                onPressed: () {
-                  loadMarkers();
-                },
-                child: ListTile(
-                  leading: Icon(
-                    Icons.location_on,
-                    color: Colors.yellow,
-                  ),
-                  title: Text(
-                    'Load Markers',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              )
+              showMapLoading
+                  ? MaterialButton(
+                      onPressed: () {},
+                      color: Color(0xff374972),
+                      child: ListTile(
+                        title: Text('Loading'),
+                        leading: CircularProgressIndicator(),
+                      ),
+                    )
+                  : MaterialButton(
+                      color: Color(0xff374972),
+                      onPressed: () {
+                        loadMarkers();
+                      },
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.location_on,
+                          color: Colors.yellow,
+                        ),
+                        title: Text(
+                          'Load Markers',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    )
             ],
           ),
         ),

@@ -29,6 +29,7 @@ dependencies:
   google_maps_flutter: ^0.5.24+1
   geocoder: ^0.2.1
   map_controller: ^0.7.0
+  retry: ^3.0.0+1
 
 
 
