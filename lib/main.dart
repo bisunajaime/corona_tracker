@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:coronatracker/corona_maps.dart';
 import 'package:coronatracker/more_info.dart';
 import 'package:coronatracker/widgets/active_cases.dart';
 import 'package:coronatracker/widgets/new_deaths.dart';
@@ -54,6 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Map<String, dynamic> results = {};
   Map<String, dynamic> moreRes = {};
   Map<MarkerId, Marker> newMarkers = <MarkerId, Marker>{};
+  List<Placemark> pMarkData = [];
   List<Map<String, dynamic>> data = [];
 
   List<Country> country = [];
@@ -61,27 +63,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   bool loading = true;
   bool showReloadMsg = false;
-  bool showMapLoading = false;
+  bool showMapLoading = true;
 
   Timer getMarkers;
 
   Future getCountries() async {
-    setState(() {
-      // clear when reload
-      loading = true;
-      showReloadMsg = false;
-      country.clear();
-      countriesList.clear();
-      totalCasesList.clear();
-      totalDeathsList.clear();
-      newDeathsList.clear();
-      totalRecovered.clear();
-      newCasesList.clear();
-      activeCasesList.clear();
-      seriousCriticalList.clear();
-    });
+    _clearLists();
 
-    Timer(Duration(seconds: 5), () {
+    Timer(Duration(seconds: 4), () {
       setState(() {
         showReloadMsg = true;
       });
@@ -95,71 +84,73 @@ class _MyHomePageState extends State<MyHomePage> {
     // print data
     List<dom.Element> totalCases = document.getElementsByTagName('td');
 
-    for (int x = 0; x < totalCases.length; x += 9) {
-      if (totalCases[x].innerHtml.contains('<a')) {
-        countriesList.add(totalCases[x].querySelector('a').innerHtml.trim());
-      } else if (totalCases[x].innerHtml.contains('<span')) {
-        countriesList.add(totalCases[x].querySelector('span').innerHtml.trim());
-      } else {
-        countriesList.add(totalCases[x].innerHtml.trim());
+    for (int x = 0; x < totalCases.length; x++) {
+      // adds to countriesList
+      if (x % 9 == 0) {
+        if (totalCases[x].innerHtml.contains('<a')) {
+          countriesList.add(totalCases[x].querySelector('a').innerHtml.trim());
+        } else if (totalCases[x].innerHtml.contains('<span')) {
+          countriesList
+              .add(totalCases[x].querySelector('span').innerHtml.trim());
+        } else {
+          countriesList.add(totalCases[x].innerHtml.trim());
+        }
       }
-    }
-
-    // Total Cases
-    for (int x = 1; x < totalCases.length; x += 9) {
-      totalCasesList.add(totalCases[x].innerHtml.trim());
-    }
-
-    for (int x = 2; x < totalCases.length; x += 9) {
-      if (totalCases[x].innerHtml.trim().length != 0) {
-        newCasesList.add(totalCases[x].innerHtml.trim());
-      } else {
-        newCasesList.add('NO');
+      // adds to totalCasesList
+      else if (x % 9 == 1) {
+        totalCasesList.add(totalCases[x].innerHtml.trim());
       }
-    }
-
-    for (int x = 3; x < totalCases.length; x += 9) {
-      if (totalCases[x].innerHtml.trim().length != 0) {
-        totalDeathsList.add(totalCases[x].innerHtml.trim());
-      } else {
-        totalDeathsList.add('NONE');
+      // adds to newCasesList
+      else if (x % 9 == 2) {
+        if (totalCases[x].innerHtml.trim().length != 0) {
+          newCasesList.add(totalCases[x].innerHtml.trim());
+        } else {
+          newCasesList.add('NO');
+        }
       }
-    }
-
-    for (int x = 4; x < totalCases.length; x += 9) {
-      if (totalCases[x].innerHtml.trim().length != 0) {
-        newDeathsList.add(totalCases[x].innerHtml.trim());
-      } else {
-        newDeathsList.add('NO');
+      // adds to totalDeathsList
+      else if (x % 9 == 3) {
+        if (totalCases[x].innerHtml.trim().length != 0) {
+          totalDeathsList.add(totalCases[x].innerHtml.trim());
+        } else {
+          totalDeathsList.add('NONE');
+        }
       }
-    }
-
-    for (int x = 5; x < totalCases.length; x += 9) {
-      if (totalCases[x].innerHtml.trim().length != 0) {
-        totalRecovered.add(totalCases[x].innerHtml.trim());
-      } else {
-        totalRecovered.add('NONE');
+      // adds to newDeathsList
+      else if (x % 9 == 4) {
+        if (totalCases[x].innerHtml.trim().length != 0) {
+          newDeathsList.add(totalCases[x].innerHtml.trim());
+        } else {
+          newDeathsList.add('NO');
+        }
       }
-    }
-
-    for (int x = 6; x < totalCases.length; x += 9) {
-      if (totalCases[x].innerHtml.trim().length != 0) {
-        activeCasesList.add(totalCases[x].innerHtml.trim());
-      } else {
-        activeCasesList.add('NONE');
+      // adds to totalRecovered
+      else if (x % 9 == 5) {
+        if (totalCases[x].innerHtml.trim().length != 0) {
+          totalRecovered.add(totalCases[x].innerHtml.trim());
+        } else {
+          totalRecovered.add('NONE');
+        }
       }
-    }
-
-    for (int x = 7; x < totalCases.length; x += 9) {
-      if (totalCases[x].innerHtml.trim().length != 0) {
-        seriousCriticalList.add(totalCases[x].innerHtml.trim());
-      } else {
-        seriousCriticalList.add('NONE');
+      // adds to activeCasesList
+      else if (x % 9 == 6) {
+        if (totalCases[x].innerHtml.trim().length != 0) {
+          activeCasesList.add(totalCases[x].innerHtml.trim());
+        } else {
+          activeCasesList.add('NONE');
+        }
+      }
+      // adds to seriousCriticalList
+      else if (x % 9 == 7) {
+        if (totalCases[x].innerHtml.trim().length != 0) {
+          seriousCriticalList.add(totalCases[x].innerHtml.trim());
+        } else {
+          seriousCriticalList.add('NONE');
+        }
       }
     }
 
     // more info load data
-
     List<dom.Element> totalsCDR = document
         .querySelectorAll('body div#maincounter-wrap .maincounter-number span');
     print('printing');
@@ -181,16 +172,11 @@ class _MyHomePageState extends State<MyHomePage> {
       );
     });
 
-    // remove total tr
-    countriesList.removeLast();
-    totalCasesList.removeLast();
-    totalDeathsList.removeLast();
-    newDeathsList.removeLast();
-    totalRecovered.removeLast();
-    newCasesList.removeLast();
-    activeCasesList.removeLast();
-    seriousCriticalList.removeLast();
+    // removes all the last records
+    _removeLastRecord();
 
+    // creates json format of data,
+    // TODO: Create search feature with json data
     Map<String, dynamic> countryJsonData = {};
     for (int i = 0; i < countriesList.length; i++) {
       countryJsonData['id_$i'] = {
@@ -209,6 +195,8 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     jsonCountryData.add(countryJsonData);
+    // Loads placemarks for maps
+    await loadMarkers();
 
     setState(() {
       loading = false;
@@ -216,19 +204,52 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  _removeLastRecord() {
+    setState(() {
+      countriesList.removeLast();
+      totalCasesList.removeLast();
+      totalDeathsList.removeLast();
+      newDeathsList.removeLast();
+      totalRecovered.removeLast();
+      newCasesList.removeLast();
+      activeCasesList.removeLast();
+      seriousCriticalList.removeLast();
+    });
+  }
+
+  _clearLists() {
+    setState(() {
+      loading = true;
+      showReloadMsg = false;
+      country.clear();
+      countriesList.clear();
+      totalCasesList.clear();
+      totalDeathsList.clear();
+      newDeathsList.clear();
+      totalRecovered.clear();
+      newCasesList.clear();
+      activeCasesList.clear();
+      seriousCriticalList.clear();
+    });
+  }
+
   loadMarkers() {
+    print('loading');
+    Timer.run(() {
+      setState(() {
+        pMarkData.clear();
+        showMapLoading = true;
+      });
+    });
     try {
       country.forEach((c) async {
-        setState(() {
-          showMapLoading = true;
-        });
         List<Placemark> placemark = await retry(
           () => Geolocator()
-              .placemarkFromAddress(c.countryName)
+              .placemarkFromAddress(
+                  "${c.countryName == "S. Korea" ? c.countryName.replaceAll('S. ', '') : c.countryName}")
               .asStream()
               .toList()
               .then((x) {
-            print('p');
             return x[0];
           }),
           delayFactor: Duration(seconds: 1),
@@ -236,16 +257,17 @@ class _MyHomePageState extends State<MyHomePage> {
           maxDelay: Duration(seconds: 2),
           onRetry: (e) {
             print(e);
-            print('!!!!!');
           },
           retryIf: (e) => e is PlatformException,
         );
+        print(placemark.length);
+        pMarkData.add(placemark[0]);
       });
     } catch (e) {
       print(e);
     }
 
-    Timer(Duration(seconds: 2), () {
+    Timer(Duration(seconds: 25), () {
       setState(() {
         showMapLoading = false;
       });
@@ -262,6 +284,34 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              pMarkData.forEach((data) {
+                print(data);
+              });
+              print(pMarkData.length);
+            },
+          )
+        ],
+        title: Column(
+          children: <Widget>[
+            Text('Corona Tracker'),
+            Text(
+              '${country.length == 0 ? 'Loading' : country.length} Places',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+                color: Colors.cyanAccent,
+              ),
+            )
+          ],
+        ),
+        centerTitle: true,
+        backgroundColor: Color(0xff1d2c4d),
+      ),
       drawer: Drawer(
         child: Container(
           color: Color(0xff1C2844),
@@ -273,8 +323,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Colors.indigo[900],
-                      Colors.indigo[800],
+                      Color(0xff0B1836),
+                      Color(0xff000F30),
                     ],
                   ),
                 ),
@@ -296,7 +346,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         height: 10,
                       ),
                       Text(
-                        '${country.length} \nAffected Places',
+                        '${country.length} \nAffected Areas',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
@@ -331,53 +381,35 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               ),
-              showMapLoading
-                  ? MaterialButton(
-                      onPressed: () {},
-                      color: Color(0xff374972),
-                      child: ListTile(
-                        title: Text('Loading'),
-                        leading: CircularProgressIndicator(),
-                      ),
-                    )
-                  : MaterialButton(
-                      color: Color(0xff374972),
-                      onPressed: () {
-                        loadMarkers();
-                      },
-                      child: ListTile(
-                        leading: Icon(
+              MaterialButton(
+                color: Color(0xff374972),
+                onPressed: () => showMapLoading
+                    ? null
+                    : Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => CoronaMaps(
+                                  resultData: country,
+                                  placemarKData: pMarkData,
+                                ))),
+                child: ListTile(
+                  leading: showMapLoading
+                      ? CircularProgressIndicator()
+                      : Icon(
                           Icons.location_on,
                           color: Colors.yellow,
                         ),
-                        title: Text(
-                          'Load Markers',
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    )
+                  title: Text(
+                    showMapLoading ? 'Loading Maps' : 'Open Maps',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              )
             ],
           ),
         ),
-      ),
-      appBar: AppBar(
-        title: Column(
-          children: <Widget>[
-            Text('Corona Tracker'),
-            Text(
-              '${country.length == 0 ? 'Loading' : country.length} Places',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-                color: Colors.cyanAccent,
-              ),
-            )
-          ],
-        ),
-        centerTitle: true,
-        backgroundColor: Color(0xff1d2c4d),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: getCountries,

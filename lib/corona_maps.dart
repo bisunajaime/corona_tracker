@@ -8,6 +8,8 @@ import 'package:coronatracker/widgets/total_deaths.dart';
 import 'package:coronatracker/widgets/total_recovered.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:geocoder/geocoder.dart';
+import 'package:geocoder/services/distant_google.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -15,9 +17,9 @@ import 'models/results.dart';
 
 class CoronaMaps extends StatefulWidget {
   final List<Country> resultData;
-  final Set<Marker> markerSet;
+  final List<Placemark> placemarKData;
 
-  CoronaMaps({this.resultData, this.markerSet});
+  CoronaMaps({this.resultData, this.placemarKData});
 
   @override
   _CoronaMapsState createState() => _CoronaMapsState();
@@ -49,65 +51,58 @@ class _CoronaMapsState extends State<CoronaMaps> {
   Timer load;
   int counter = 0;
   GoogleMapController _mapController;
+  Completer<GoogleMapController> completer = Completer();
 
-  Future getMarkers(Country data) async {
-    try {
-      List<Placemark> placemarks = await Geolocator().placemarkFromAddress(
-          '${data.countryName == 'S. Korea' ? data.countryName.replaceAll('S. ', '') : data.countryName}');
-      Placemark thePlacemark = placemarks.first;
-      Marker theMarker = Marker(
-        markerId: MarkerId(data.countryName),
-        position: LatLng(
-            thePlacemark.position.latitude, thePlacemark.position.longitude),
-        consumeTapEvents: true,
-        infoWindow: InfoWindow(
-          anchor: Offset(10.0, 10.0),
-          title: data.countryName,
-          snippet: data.info.totalCases,
-          onTap: () {
-            print('tapped');
-          },
-        ),
-        onTap: () {
-          print('tap');
-          setState(() {
-            tappedPos = LatLng(thePlacemark.position.latitude,
-                thePlacemark.position.longitude);
-            tappedText = data;
-          });
-          _mapController.animateCamera(CameraUpdate.newCameraPosition(
-            CameraPosition(
-              zoom: tapZoom,
-              target: LatLng(
-                thePlacemark.position.latitude,
-                thePlacemark.position.longitude,
-              ),
-            ),
-          ));
-        },
-      );
-
-      setState(() {
-        newMarkers[MarkerId(data.countryName)] = theMarker;
-      });
-      print(markers.length);
-    } catch (e) {
-      print('<< $e >>;');
-    }
+  getMarkers(Country data) {
+    widget.placemarKData.forEach((pm) {
+      if (pm.country.contains(data.countryName)) {
+        print("Data: ${data.countryName}; Placemark: ${pm.country}");
+        Marker markers = Marker(
+            markerId: MarkerId(pm.country),
+            position: LatLng(pm.position.latitude, pm.position.longitude),
+            consumeTapEvents: true,
+            onTap: () {
+              print('${data.info.totalCases}');
+              setState(() {
+                tappedPos = LatLng(pm.position.latitude, pm.position.longitude);
+                tappedText = data;
+              });
+              _mapController.animateCamera(CameraUpdate.newCameraPosition(
+                CameraPosition(
+                  zoom: tapZoom,
+                  target: LatLng(
+                    pm.position.latitude,
+                    pm.position.longitude,
+                  ),
+                ),
+              ));
+            });
+        setState(() {
+          newMarkers[MarkerId(pm.country)] = markers;
+        });
+      }
+    });
   }
 
-  Future loadData() async {
+  loadData() {
     print('hello');
-    setState(() {
-      loading = true;
+    Timer.run(() {
+      setState(() {
+        loading = true;
+      });
     });
 
-    widget.resultData.map((data) async => await getMarkers(data)).toList();
-
-    setState(() {
-      loading = false;
+    widget.resultData.forEach((data) {
+      print(data.countryName);
     });
-    print(newMarkers.length);
+
+    widget.resultData.forEach((data) => getMarkers(data));
+
+    Timer(Duration(seconds: 5), () {
+      setState(() {
+        loading = false;
+      });
+    });
   }
 
   @override
@@ -115,9 +110,6 @@ class _CoronaMapsState extends State<CoronaMaps> {
     super.initState();
     rootBundle.loadString('assets/maps/dark_maps.txt').then((string) {
       mapStyle = string;
-    });
-    setState(() {
-      loading = true;
     });
     loadData();
   }
@@ -134,6 +126,26 @@ class _CoronaMapsState extends State<CoronaMaps> {
     Color lightBlue = Color(0xff203053);
     return Scaffold(
       appBar: AppBar(
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              Timer.run(() {
+                setState(() {
+                  loading = true;
+                  loadData();
+                });
+              });
+              print(widget.placemarKData.length);
+              print(widget.resultData.length);
+              Timer(Duration(seconds: 2), () {
+                setState(() {
+                  loading = false;
+                });
+              });
+            },
+          )
+        ],
         backgroundColor: Color(0xff1d2c4d),
         centerTitle: true,
         title: Column(
@@ -146,7 +158,7 @@ class _CoronaMapsState extends State<CoronaMaps> {
               ),
             ),
             Text(
-              'Markers: ${newMarkers.length}',
+              'Markers: ${widget.placemarKData.length}',
               style: TextStyle(
                 fontSize: 13.0,
               ),
