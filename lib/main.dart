@@ -444,7 +444,7 @@ class _MyHomePageState extends State<MyHomePage> {
           : ListView(
               physics: BouncingScrollPhysics(),
               children: <Widget>[
-                Text('Title'),
+                Text(''),
                 Column(
                   children: List.generate(
                     country.length,

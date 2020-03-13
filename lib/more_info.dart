@@ -8,7 +8,7 @@ class MoreInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color darkBlue = Color(0xff1C2844);
+    Color darkBlue = Color(0xff131C2F);
     Color lightBlue = Color(0xff375087);
 
     return Scaffold(

@@ -29,7 +29,7 @@ class SeriousCritical extends StatelessWidget {
                 horizontal: isRow ? 20.0 : 5.0,
               ),
         padding: EdgeInsets.symmetric(
-          vertical: isRow ? 15.0 : 10,
+          vertical: isRow ? 15.0 : 15,
         ),
         decoration: BoxDecoration(
           color: Color(0xff131C2F),

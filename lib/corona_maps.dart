@@ -8,8 +8,6 @@ import 'package:coronatracker/widgets/total_deaths.dart';
 import 'package:coronatracker/widgets/total_recovered.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:geocoder/geocoder.dart';
-import 'package:geocoder/services/distant_google.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -295,23 +293,22 @@ class _CoronaMapsState extends State<CoronaMaps> {
                                             type: 'New Deaths',
                                             dataSize: 20,
                                             textSize: 12,
-                                          )
+                                          ),
+                                          SeriousCritical(
+                                            data:
+                                                tappedText.info.seriousCritical,
+                                            type: 'Serious ',
+                                            dataSize: 20,
+                                            textSize: 12,
+                                            isRow: false,
+                                          ),
                                         ],
                                       ),
                                       SizedBox(
                                         height: 5,
                                       ),
                                       Row(
-                                        children: <Widget>[
-                                          SeriousCritical(
-                                            data:
-                                                tappedText.info.seriousCritical,
-                                            type: 'Serious, Critical: ',
-                                            dataSize: 15,
-                                            textSize: 15,
-                                            isRow: true,
-                                          ),
-                                        ],
+                                        children: <Widget>[],
                                       )
                                     ],
                                   ),
