@@ -11,6 +11,7 @@ import 'package:coronatracker/widgets/total_deaths.dart';
 import 'package:coronatracker/widgets/total_recovered.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:html/dom.dart' as dom;
@@ -66,9 +67,12 @@ class _MyHomePageState extends State<MyHomePage> {
   bool showReloadMsg = false;
   bool showMapLoading = true;
 
+  String filterTxt;
+
   Timer getMarkers;
 
   ScrollController controller;
+  TextEditingController textController = TextEditingController();
 
   int loadListLength;
 
@@ -276,7 +280,7 @@ class _MyHomePageState extends State<MyHomePage> {
       print(e);
     }
 
-    Timer(Duration(seconds: 25), () {
+    Timer(Duration(seconds: 15), () {
       setState(() {
         showMapLoading = false;
       });
@@ -288,6 +292,11 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     getCountries();
     controller = new ScrollController()..addListener(_scrollListener);
+    textController.addListener(() {
+      setState(() {
+        filterTxt = textController.text;
+      });
+    });
     //initiate();
   }
 
@@ -303,6 +312,22 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              pMarkData.forEach((f) async {
+                Future<List<Address>> g =
+                    Geocoder.local.findAddressesFromQuery(f.country);
+                await g.then((v) {
+                  print(v.first.coordinates);
+                }).catchError((onError) {
+                  print(onError);
+                });
+              });
+            },
+          )
+        ],
         title: Column(
           children: <Widget>[
             Text('Corona Tracker'),
@@ -376,12 +401,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 child: ListTile(
-                  leading: Icon(
-                    Icons.info_outline,
-                    color: Colors.redAccent[100],
-                  ),
+                  leading: loading
+                      ? CircularProgressIndicator()
+                      : Icon(
+                          Icons.info_outline,
+                          color: Colors.redAccent[100],
+                        ),
                   title: Text(
-                    'More Information',
+                    '${loading ? 'Loading' : 'More'} Information',
                     style: TextStyle(
                       color: Colors.white,
                     ),
@@ -390,15 +417,17 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               MaterialButton(
                 color: Color(0xff374972),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MapsCorona(
-                      placemarks: pMarkData,
-                      country: country,
-                    ),
-                  ),
-                ),
+                onPressed: () => showMapLoading
+                    ? null
+                    : Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MapsCorona(
+                            placemarks: pMarkData,
+                            country: country,
+                          ),
+                        ),
+                      ),
                 child: ListTile(
                   leading: showMapLoading
                       ? CircularProgressIndicator()
@@ -450,161 +479,226 @@ class _MyHomePageState extends State<MyHomePage> {
             )
           : Column(
               children: <Widget>[
-                Text(
-                  'Search Goes Here',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: TextField(
+                    controller: textController,
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                    decoration: InputDecoration(
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.backspace,
+                          color: Colors.grey[200],
+                        ),
+                        tooltip: 'Clear',
+                        onPressed: () {
+                          textController.clear();
+                        },
+                      ),
+                      prefixIcon: Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                      ),
+                      filled: true,
+                      fillColor: Color(0xff1d2c4d),
+                      hintText: 'Enter a country',
+                      hintStyle: TextStyle(
+                        color: Colors.white,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5),
+                        borderSide: BorderSide(
+                          color: Colors.white,
+                          width: 1.0,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 Expanded(
                   child: Container(
-                    child: ListView.builder(
-                      controller: controller,
-                      physics: BouncingScrollPhysics(),
-                      itemCount: loadListLength,
-                      itemBuilder: (context, i) {
-                        if (i == loadListLength) {
-                          return CircularProgressIndicator();
-                        }
-                        Country c = country[i];
-                        return Container(
-                          margin: EdgeInsets.all(10),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 10.0,
-                            vertical: 10.0,
-                          ),
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Color(0xff1d2c4d),
-                            borderRadius: BorderRadius.circular(5),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black45,
-                                blurRadius: 10.0,
-                              )
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Text(
-                                    '${c.countryName}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                      fontSize: 20.0,
-                                    ),
-                                  ),
-                                  Column(
-                                    children: <Widget>[
-                                      Text(
-                                        '${c.info.newCases}',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                          color: c.info.newCases == 'NO'
-                                              ? Colors.greenAccent
-                                              : int.parse(c.info.newCases
-                                                          .replaceFirst('+', '')
-                                                          .replaceAll(
-                                                              ',', '')) >=
-                                                      10
-                                                  ? Colors.amber
-                                                  : Colors.orange,
-                                        ),
-                                      ),
-                                      Text(
-                                        'New Cases',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 10.0,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 10.0,
-                              ),
-                              Column(
-                                children: <Widget>[
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: <Widget>[
-                                      TotalCases(
-                                        data: c.info.totalCases,
-                                        type: 'Total Cases',
-                                        dataSize: 20,
-                                        textSize: 12,
-                                        isMaps: false,
-                                      ),
-                                      TotalDeaths(
-                                        data: c.info.totalDeaths,
-                                        type: 'Total Deaths',
-                                        dataSize: 20,
-                                        textSize: 12,
-                                        isMaps: false,
-                                      ),
-                                      NewDeaths(
-                                        data: c.info.newDeaths,
-                                        type: 'New Deaths',
-                                        dataSize: 20,
-                                        textSize: 12,
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 10.0,
-                                  ),
-                                  Row(
-                                    children: <Widget>[
-                                      TotalRecovered(
-                                        data: c.info.totalRecovered,
-                                        type: 'Total Recovered',
-                                        dataSize: 20,
-                                        textSize: 15,
-                                      ),
-                                      ActiveCases(
-                                        data: c.info.activeCases,
-                                        type: 'Active Cases',
-                                        dataSize: 20,
-                                        textSize: 15,
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 10.0,
-                                  ),
-                                  Row(
-                                    children: <Widget>[
-                                      SeriousCritical(
-                                        data: c.info.seriousCritical,
-                                        type: 'Serious, Critical',
-                                        dataSize: 25,
-                                        textSize: 15,
-                                        isRow: false,
-                                      )
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                    child: Scrollbar(
+                      controller: ScrollController(),
+                      child: ListView.builder(
+                        controller: controller,
+                        physics: BouncingScrollPhysics(),
+                        itemCount: country.length,
+                        itemBuilder: (context, i) {
+                          Country c = country[i];
+                          return filterTxt == null ||
+                                  filterTxt == "" ||
+                                  filterTxt.trim().length == 0
+                              ? DataWidget(
+                                  country: c,
+                                )
+                              : _search(filterTxt, c)
+                                  ? DataWidget(
+                                      country: c,
+                                    )
+                                  : Container();
+                        },
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
+    );
+  }
+
+  bool _search(String val, Country c) {
+    if (c.countryName.toLowerCase().trim().contains(val.toLowerCase())) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
+
+class DataWidget extends StatelessWidget {
+  final Country country;
+
+  DataWidget({this.country});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.all(10),
+      padding: EdgeInsets.symmetric(
+        horizontal: 10.0,
+        vertical: 10.0,
+      ),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Color(0xff1d2c4d),
+        borderRadius: BorderRadius.circular(5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black45,
+            blurRadius: 10.0,
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Icon(
+                    Icons.location_on,
+                    color: Colors.red,
+                  ),
+                  Text(
+                    '${country.countryName}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 20.0,
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                children: <Widget>[
+                  Text(
+                    '${country.info.newCases}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: country.info.newCases == 'NO'
+                          ? Colors.greenAccent
+                          : int.parse(country.info.newCases
+                                      .replaceFirst('+', '')
+                                      .replaceAll(',', '')) >=
+                                  10
+                              ? Colors.amber
+                              : Colors.orange,
+                    ),
+                  ),
+                  Text(
+                    'New Cases',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10.0,
+                      color: Colors.white,
+                    ),
+                  )
+                ],
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 10.0,
+          ),
+          Column(
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  TotalCases(
+                    data: country.info.totalCases,
+                    type: 'Total Cases',
+                    dataSize: 20,
+                    textSize: 12,
+                    isMaps: false,
+                  ),
+                  TotalDeaths(
+                    data: country.info.totalDeaths,
+                    type: 'Total Deaths',
+                    dataSize: 20,
+                    textSize: 12,
+                    isMaps: false,
+                  ),
+                  NewDeaths(
+                    data: country.info.newDeaths,
+                    type: 'New Deaths',
+                    dataSize: 20,
+                    textSize: 12,
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 10.0,
+              ),
+              Row(
+                children: <Widget>[
+                  TotalRecovered(
+                    data: country.info.totalRecovered,
+                    type: 'Total Recovered',
+                    dataSize: 20,
+                    textSize: 15,
+                  ),
+                  ActiveCases(
+                    data: country.info.activeCases,
+                    type: 'Active Cases',
+                    dataSize: 20,
+                    textSize: 15,
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 10.0,
+              ),
+              Row(
+                children: <Widget>[
+                  SeriousCritical(
+                    data: country.info.seriousCritical,
+                    type: 'Serious, Critical',
+                    dataSize: 25,
+                    textSize: 15,
+                    isRow: false,
+                  )
+                ],
+              )
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
