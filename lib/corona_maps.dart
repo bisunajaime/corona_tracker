@@ -246,73 +246,79 @@ class _CoronaMapsState extends State<CoronaMaps> {
                                     ],
                                   ),
                                 ),
-                                Expanded(
-                                  flex: 4,
-                                  child: Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: <Widget>[
-                                      Row(
-                                        children: <Widget>[
-                                          TotalCases(
-                                            data: tappedText.info.totalCases,
-                                            type: 'Total Cases',
-                                            dataSize: 20,
-                                            textSize: 12,
-                                            isMaps: true,
-                                          ),
-                                          TotalRecovered(
-                                            data:
-                                                tappedText.info.totalRecovered,
-                                            type: 'Total Recovered',
-                                            dataSize: 20,
-                                            textSize: 12,
-                                          ),
-                                          ActiveCases(
-                                            data: tappedText.info.activeCases,
-                                            type: 'Active Cases',
-                                            dataSize: 20,
-                                            textSize: 12,
-                                          ),
-                                        ],
+                                tappedText.info.totalCases == '0'
+                                    ? Text('')
+                                    : Expanded(
+                                        flex: 4,
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: <Widget>[
+                                            Row(
+                                              children: <Widget>[
+                                                TotalCases(
+                                                  data: tappedText
+                                                      .info.totalCases,
+                                                  type: 'Total Cases',
+                                                  dataSize: 20,
+                                                  textSize: 12,
+                                                  isMaps: true,
+                                                ),
+                                                TotalRecovered(
+                                                  data: tappedText
+                                                      .info.totalRecovered,
+                                                  type: 'Total Recovered',
+                                                  dataSize: 20,
+                                                  textSize: 12,
+                                                ),
+                                                ActiveCases(
+                                                  data: tappedText
+                                                      .info.activeCases,
+                                                  type: 'Active Cases',
+                                                  dataSize: 20,
+                                                  textSize: 12,
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            Row(
+                                              children: <Widget>[
+                                                TotalDeaths(
+                                                  data: tappedText
+                                                      .info.totalDeaths,
+                                                  type: 'Total Deaths',
+                                                  dataSize: 20,
+                                                  textSize: 12,
+                                                  isMaps: true,
+                                                ),
+                                                NewDeaths(
+                                                  data:
+                                                      tappedText.info.newDeaths,
+                                                  type: 'New Deaths',
+                                                  dataSize: 20,
+                                                  textSize: 12,
+                                                ),
+                                                SeriousCritical(
+                                                  data: tappedText
+                                                      .info.seriousCritical,
+                                                  type: 'Serious ',
+                                                  dataSize: 20,
+                                                  textSize: 12,
+                                                  isRow: false,
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            Row(
+                                              children: <Widget>[],
+                                            )
+                                          ],
+                                        ),
                                       ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      Row(
-                                        children: <Widget>[
-                                          TotalDeaths(
-                                            data: tappedText.info.totalDeaths,
-                                            type: 'Total Deaths',
-                                            dataSize: 20,
-                                            textSize: 12,
-                                            isMaps: true,
-                                          ),
-                                          NewDeaths(
-                                            data: tappedText.info.newDeaths,
-                                            type: 'New Deaths',
-                                            dataSize: 20,
-                                            textSize: 12,
-                                          ),
-                                          SeriousCritical(
-                                            data:
-                                                tappedText.info.seriousCritical,
-                                            type: 'Serious ',
-                                            dataSize: 20,
-                                            textSize: 12,
-                                            isRow: false,
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      Row(
-                                        children: <Widget>[],
-                                      )
-                                    ],
-                                  ),
-                                ),
                               ],
                             ),
                           )
