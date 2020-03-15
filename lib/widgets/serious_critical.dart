@@ -49,6 +49,7 @@ class SeriousCritical extends StatelessWidget {
                     '$type',
                     textAlign: TextAlign.center,
                     style: TextStyle(
+                      fontFamily: 'Lato-Black',
                       fontSize: textSize,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -61,6 +62,7 @@ class SeriousCritical extends StatelessWidget {
                     '$data',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'Lato-Regular',
                       fontSize: dataSize,
                       color: data == 'NONE' || data == 'NO'
                           ? Colors.greenAccent
@@ -78,6 +80,7 @@ class SeriousCritical extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: dataSize,
+                      fontFamily: 'Lato-Black',
                       color: data == 'NONE' || data == 'NO'
                           ? Colors.greenAccent
                           : int.parse(data.replaceAll(',', '').toString()) >= 10
@@ -93,6 +96,7 @@ class SeriousCritical extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: textSize,
+                      fontFamily: 'Lato-Regular',
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),

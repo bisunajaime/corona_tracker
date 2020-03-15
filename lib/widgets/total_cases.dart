@@ -42,6 +42,7 @@ class TotalCases extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: dataSize,
+                fontFamily: 'Lato-Black',
                 color: data == 'NONE' || data == 'NO'
                     ? Colors.blueAccent
                     : int.parse(data.replaceAll(',', '').toString()) >= 10
@@ -58,6 +59,7 @@ class TotalCases extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: textSize,
+                fontFamily: 'Lato-Regular',
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),

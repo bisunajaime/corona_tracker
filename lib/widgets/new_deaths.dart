@@ -39,6 +39,7 @@ class NewDeaths extends StatelessWidget {
               '$data',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontFamily: 'Lato-Black',
                 fontSize: dataSize,
                 color: data == 'NONE' || data == 'NO'
                     ? Colors.greenAccent
@@ -55,6 +56,7 @@ class NewDeaths extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: textSize,
+                fontFamily: 'Lato-Regular',
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),

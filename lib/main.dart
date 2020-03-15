@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
 
-// import 'package:coronatracker/corona_maps.dart';
 import 'package:coronatracker/maps_corona.dart';
 import 'package:coronatracker/more_info.dart';
 import 'package:coronatracker/widgets/active_cases.dart';
@@ -13,16 +11,11 @@ import 'package:coronatracker/widgets/total_recovered.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:geocoder/geocoder.dart';
-import 'package:geolocator/geolocator.dart';
-// import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
-import 'package:retry/retry.dart';
 
 import 'models/results.dart';
-import 'package:latlong/latlong.dart';
 
 void main() => runApp(MyApp());
 
@@ -31,13 +24,21 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Corona Tracker',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return GestureDetector(
+      onTap: () {
+        FocusScopeNode currentFocus = FocusScope.of(context);
+        if (!currentFocus.hasPrimaryFocus) {
+          currentFocus.unfocus();
+        }
+      },
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Corona Tracker',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: MyHomePage(),
       ),
-      home: MyHomePage(),
     );
   }
 }
@@ -61,7 +62,6 @@ class _MyHomePageState extends State<MyHomePage> {
   Map<String, dynamic> results = {};
   Map<String, dynamic> moreRes = {};
   // Map<MarkerId, Marker> newMarkers = <MarkerId, Marker>{};
-  List<Placemark> pMarkData = [];
   List<Marker> markers = [];
   List<Map<String, dynamic>> data = [];
 
@@ -321,19 +321,19 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: () {},
-          )
-        ],
         title: Column(
           children: <Widget>[
-            Text('Corona Tracker'),
+            Text(
+              'Corona Tracker',
+              style: TextStyle(
+                fontFamily: 'Lato-Black',
+              ),
+            ),
             Text(
               '${country.length == 0 ? 'Loading' : country.length} Places',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontFamily: 'Lato-Regular',
                 fontSize: 15,
                 color: Colors.cyanAccent,
               ),
@@ -368,6 +368,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         'Corona Tracker',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
+                          fontFamily: 'Lato-Black',
                           color: Colors.white,
                           fontSize: 30,
                         ),
@@ -380,8 +381,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         '${country.length} \nAffected Areas',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontWeight: FontWeight.bold,
                           color: Colors.yellow,
+                          fontFamily: 'Lato-Bold',
                           fontSize: 20,
                         ),
                       )
@@ -410,6 +411,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     '${loading ? 'Loading' : 'More'} Information',
                     style: TextStyle(
                       color: Colors.white,
+                      fontFamily: 'Lato-Regular',
                     ),
                   ),
                 ),
@@ -422,7 +424,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => MapsCorona(
-                            placemarks: pMarkData,
                             country: country,
                             markers: markers,
                           ),
@@ -436,9 +437,10 @@ class _MyHomePageState extends State<MyHomePage> {
                           color: Colors.yellow,
                         ),
                   title: Text(
-                    'OpenMaps',
+                    'Open Maps',
                     style: TextStyle(
                       color: Colors.white,
+                      fontFamily: 'Lato-Regular',
                     ),
                   ),
                 ),
@@ -447,13 +449,15 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: getCountries,
-        backgroundColor: Color(0xff375087),
-        child: Icon(
-          Icons.refresh,
-        ),
-      ),
+      floatingActionButton: loading
+          ? null
+          : FloatingActionButton(
+              onPressed: getCountries,
+              backgroundColor: Color(0xff375087),
+              child: Icon(
+                Icons.refresh,
+              ),
+            ),
       backgroundColor: Color(0xff375087),
       body: loading
           ? Center(
@@ -470,8 +474,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 20.0,
+                      fontSize: showReloadMsg ? 15.0 : 20.0,
                       color: Colors.white,
+                      fontFamily: 'Lato-Regular',
                     ),
                   )
                 ],
@@ -485,6 +490,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     controller: textController,
                     style: TextStyle(
                       color: Colors.white,
+                      fontFamily: 'Lato-Regular',
                     ),
                     decoration: InputDecoration(
                       suffixIcon: IconButton(
@@ -498,14 +504,15 @@ class _MyHomePageState extends State<MyHomePage> {
                         },
                       ),
                       prefixIcon: Icon(
-                        Icons.location_on,
-                        color: Colors.red,
+                        Icons.search,
+                        color: Colors.white,
                       ),
                       filled: true,
                       fillColor: Color(0xff1d2c4d),
-                      hintText: 'Enter a country',
+                      hintText: 'Search a country',
                       hintStyle: TextStyle(
                         color: Colors.white,
+                        fontFamily: 'Lato-Regular',
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5),
@@ -523,7 +530,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       controller: ScrollController(),
                       child: ListView.builder(
                         // TODO: Lazy Load
-                        controller: controller,
                         physics: BouncingScrollPhysics(),
                         itemCount: country.length,
                         itemBuilder: (context, i) {
@@ -599,17 +605,21 @@ class DataWidget extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
+                      fontFamily: 'Lato-Black',
                       fontSize: 20.0,
                     ),
                   ),
                 ],
               ),
               Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(
                     '${country.info.newCases}',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'Lato-Black',
                       fontSize: 20,
                       color: country.info.newCases == 'NO'
                           ? Colors.greenAccent
@@ -627,6 +637,7 @@ class DataWidget extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       fontSize: 10.0,
                       color: Colors.white,
+                      fontFamily: 'Lato-Regular',
                     ),
                   )
                 ],

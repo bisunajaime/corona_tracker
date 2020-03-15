@@ -34,6 +34,7 @@ class TotalRecovered extends StatelessWidget {
               '$data',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontFamily: 'Lato-Black',
                 fontSize: dataSize,
                 color: data == 'NONE' || data == 'NO'
                     ? Colors.blueAccent
@@ -49,6 +50,7 @@ class TotalRecovered extends StatelessWidget {
               '$type',
               textAlign: TextAlign.center,
               style: TextStyle(
+                fontFamily: 'Lato-Regular',
                 fontSize: textSize,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,

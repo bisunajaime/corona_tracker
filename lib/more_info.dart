@@ -1,10 +1,22 @@
 import 'package:coronatracker/models/results.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class MoreInfo extends StatelessWidget {
+class MoreInfo extends StatefulWidget {
   final MoreResults results;
 
   MoreInfo({this.results});
+
+  @override
+  _MoreInfoState createState() => _MoreInfoState();
+}
+
+class _MoreInfoState extends State<MoreInfo> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +26,13 @@ class MoreInfo extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: darkBlue,
-        title: Text('More Info'),
+        title: Text(
+          'More Info',
+          style: TextStyle(
+            fontFamily: 'Lato-Black',
+          ),
+        ),
+        centerTitle: true,
       ),
       backgroundColor: lightBlue,
       body: ListView(
@@ -23,10 +41,11 @@ class MoreInfo extends StatelessWidget {
           Row(
             children: <Widget>[
               InfoWidget(
-                info: results.totalCases,
+                info: widget.results.totalCases,
                 title: 'Total Cases',
                 infoColor:
-                    int.parse(results.totalCases.replaceAll(',', '')) > 1000
+                    int.parse(widget.results.totalCases.replaceAll(',', '')) >
+                            1000
                         ? Colors.redAccent[100]
                         : Colors.cyanAccent,
                 isCentered: true,
@@ -36,16 +55,17 @@ class MoreInfo extends StatelessWidget {
           Row(
             children: <Widget>[
               InfoWidget(
-                info: results.totalDeaths,
+                info: widget.results.totalDeaths,
                 title: 'Deaths',
                 infoColor:
-                    int.parse(results.totalCases.replaceAll(',', '')) > 1000
+                    int.parse(widget.results.totalCases.replaceAll(',', '')) >
+                            1000
                         ? Colors.yellowAccent
                         : Colors.cyanAccent,
                 isCentered: true,
               ),
               InfoWidget(
-                info: results.totalRecovered,
+                info: widget.results.totalRecovered,
                 title: 'Recovered Cases',
                 infoColor: Colors.greenAccent,
                 isCentered: true,
@@ -55,13 +75,13 @@ class MoreInfo extends StatelessWidget {
           Row(
             children: <Widget>[
               InfoWidget(
-                info: results.totalActiveCases,
+                info: widget.results.totalActiveCases,
                 infoColor: Colors.redAccent[100],
                 title: 'Active Cases',
                 isCentered: true,
               ),
               InfoWidget(
-                info: results.totalClosedCases,
+                info: widget.results.totalClosedCases,
                 infoColor: Colors.greenAccent,
                 title: 'Closed Cases',
                 isCentered: true,
@@ -71,7 +91,7 @@ class MoreInfo extends StatelessWidget {
           Row(
             children: <Widget>[
               InfoWidget(
-                info: results.totalMild,
+                info: widget.results.totalMild,
                 infoColor: Colors.tealAccent,
                 title: 'Mild Condition',
                 isCentered: true,
@@ -81,7 +101,7 @@ class MoreInfo extends StatelessWidget {
           Row(
             children: <Widget>[
               InfoWidget(
-                info: results.totalSeriousCritical,
+                info: widget.results.totalSeriousCritical,
                 infoColor: Colors.redAccent[100],
                 title: 'Serious / Critical',
                 isCentered: true,
@@ -91,13 +111,13 @@ class MoreInfo extends StatelessWidget {
           Row(
             children: <Widget>[
               InfoWidget(
-                info: results.totalRecovered,
+                info: widget.results.totalRecovered,
                 infoColor: Colors.tealAccent,
                 title: 'Recovered',
                 isCentered: true,
               ),
               InfoWidget(
-                info: results.totalDischarged,
+                info: widget.results.totalDischarged,
                 infoColor: Colors.tealAccent,
                 title: 'Discharged',
                 isCentered: true,
@@ -155,6 +175,7 @@ class InfoWidget extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
+                fontFamily: 'Lato-Regular',
                 fontSize: 15,
               ),
             ),
@@ -164,6 +185,7 @@ class InfoWidget extends StatelessWidget {
             Text(
               info,
               style: TextStyle(
+                fontFamily: 'Lato-Black',
                 color: infoColor,
                 fontSize: 30,
                 fontWeight: FontWeight.bold,

@@ -8,16 +8,14 @@ import 'package:coronatracker/widgets/total_recovered.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map/plugin_api.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:latlong/latlong.dart';
 import 'package:http/http.dart' as http;
 
 class MapsCorona extends StatefulWidget {
-  final List<Placemark> placemarks;
   final List<Country> country;
   final List<Marker> markers;
 
-  MapsCorona({this.placemarks, this.country, this.markers});
+  MapsCorona({this.country, this.markers});
 
   @override
   _MapsCoronaState createState() => _MapsCoronaState();
@@ -27,7 +25,6 @@ class _MapsCoronaState extends State<MapsCorona> {
   LatLng initialPos = LatLng(12, 121);
   bool didTap = false;
   bool loading = false;
-  Placemark initialPm = Placemark();
   MapController controller = MapController();
   Country initialCountry;
   List<Marker> markerList = [];
@@ -98,15 +95,6 @@ class _MapsCoronaState extends State<MapsCorona> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: () async {
-              print('reload');
-              await getMapData();
-            },
-          )
-        ],
         centerTitle: true,
         backgroundColor: Color(0xff102044),
         title: Column(
@@ -241,18 +229,19 @@ class _MapsCoronaState extends State<MapsCorona> {
                       width: double.infinity,
                       color: Color(0xff000D29),
                       child: !didTap
-                          ? Row(
+                          ? Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
                                 Icon(
                                   Icons.location_on,
-                                  color: Colors.red,
+                                  color: Colors.redAccent[100],
                                   size: 40.0,
                                 ),
                                 Text(
                                   'Tap on a marker',
                                   style: TextStyle(
+                                    fontFamily: 'Lato-Black',
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 30.0,
@@ -277,6 +266,7 @@ class _MapsCoronaState extends State<MapsCorona> {
                                       Text(
                                         '${initialCountry.countryName}',
                                         style: TextStyle(
+                                          fontFamily: 'Lato-Black',
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
                                           fontSize: 25.0,
