@@ -1,29 +1,23 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
-
 import 'package:coronatracker/models/results.dart';
 import 'package:coronatracker/widgets/active_cases.dart';
-import 'package:coronatracker/widgets/new_deaths.dart';
-import 'package:coronatracker/widgets/serious_critical.dart';
 import 'package:coronatracker/widgets/total_cases.dart';
 import 'package:coronatracker/widgets/total_deaths.dart';
 import 'package:coronatracker/widgets/total_recovered.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map/plugin_api.dart';
-import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong/latlong.dart';
-import 'package:html/dom.dart' as dom;
-import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 
 class MapsCorona extends StatefulWidget {
   final List<Placemark> placemarks;
   final List<Country> country;
+  final List<Marker> markers;
 
-  MapsCorona({this.placemarks, this.country});
+  MapsCorona({this.placemarks, this.country, this.markers});
 
   @override
   _MapsCoronaState createState() => _MapsCoronaState();
@@ -38,84 +32,40 @@ class _MapsCoronaState extends State<MapsCorona> {
   Country initialCountry;
   List<Marker> markerList = [];
   List<MapsData> mapData;
+  List<LocationData> locData = [];
+
+  int length = 0;
 
   Future getMapData() async {
+    setState(() {
+      loading = true;
+    });
     print('getting data');
     http.Client client = http.Client();
     http.Response response = await client
         .get('https://coronavirus-tracker-api.herokuapp.com/confirmed');
     var body = jsonDecode(response.body);
-    List<String> jsonCountry = [];
-    print('data received; LENGTH: ${body['locations'].length}');
-    for (int i = 0; i < body['locations'].length; i++) {
-      for (int x = 0; x < widget.country.length; x++) {
-        if (body['locations'][i]['country'] == widget.country[x].countryName) {
-          var dt = body['locations'][i]['country'];
-          jsonCountry.add(dt);
-        }
-      }
-      //print(body['locations'][i]['coordinates']['lat']);
+
+    // loop through URL LOCATIONS ARRAY
+    var urlLocArr = body['locations'];
+
+    for (int i = 0; i < urlLocArr.length; i++) {
+      Map<String, dynamic> data = {
+        'country': urlLocArr[i]['country'],
+        'lat': urlLocArr[i]['coordinates']['lat'],
+        'long': urlLocArr[i]['coordinates']['long'],
+      };
+
+      locData.add(LocationData.fromJson(data));
     }
-    List<String> strJson = jsonCountry.toSet().toList();
-
-    print(body['locations'].indexOf(body['locations'][0]['country']));
-    print(strJson.length);
-  }
-
-  getMarkers(Country country) {
-    widget.placemarks.forEach((placemark) {
-      if (placemark.country.contains(country.countryName)) {
-        markerList.add(
-          Marker(
-            point: LatLng(
-              placemark.position.latitude,
-              placemark.position.longitude,
-            ),
-            builder: (context) {
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    didTap = true;
-                    initialPm = placemark;
-                    initialCountry = country;
-                    initialPos = LatLng(
-                      placemark.position.latitude,
-                      placemark.position.longitude,
-                    );
-                    controller.move(
-                        LatLng(
-                          placemark.position.latitude,
-                          placemark.position.longitude,
-                        ),
-                        4.0);
-                  });
-                },
-                child: Icon(
-                  Icons.location_on,
-                  color:
-                      int.parse(country.info.totalCases.replaceAll(',', '')) >=
-                              10
-                          ? Colors.redAccent[100]
-                          : Colors.greenAccent[100],
-                  size: 40.0,
-                ),
-              );
-            },
-          ),
-        );
-      }
+    client.close();
+    setState(() {
+      loading = false;
     });
   }
 
   loadData() {
-    // Timer.run(() {
-    //   setState(() {
-    //     loading = true;
-    //   });
-    // });
-    widget.country.forEach((ctry) {
-      getMarkers(ctry);
-    });
+    getMapData();
     Future<MapController> mc = controller.onReady;
     mc.whenComplete(() {
       print('complete');
@@ -136,15 +86,24 @@ class _MapsCoronaState extends State<MapsCorona> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    setState(() {
+      locData.clear();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.refresh),
-            onPressed: () {
+            onPressed: () async {
               print('reload');
-              getMapData();
+              await getMapData();
             },
           )
         ],
@@ -154,22 +113,10 @@ class _MapsCoronaState extends State<MapsCorona> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Text(
-              'Current Cases: ${widget.country.length}',
+              '${widget.country.length} Current Cases',
               style: TextStyle(
-                fontSize: 13.0,
-              ),
-            ),
-            Text(
-              'Markers: ${widget.placemarks.length}',
-              style: TextStyle(
-                fontSize: 13.0,
-              ),
-            ),
-            Text(
-              'Takes a while to load the markers',
-              style: TextStyle(
-                fontSize: 13.0,
-                color: Colors.greenAccent,
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],
@@ -210,7 +157,56 @@ class _MapsCoronaState extends State<MapsCorona> {
                                 subdomains: ['a', 'b', 'c'],
                               ),
                               MarkerLayerOptions(
-                                markers: markerList,
+                                markers:
+                                    List.generate(widget.country.length, (i) {
+                                  for (int x = 0; x < locData.length; x++) {
+                                    if (locData[x].country ==
+                                        widget.country[i].countryName) {
+                                      var data = locData[x];
+                                      return Marker(
+                                        point: LatLng(
+                                          double.parse(data.lat),
+                                          double.parse(data.long),
+                                        ),
+                                        builder: (context) {
+                                          return GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                didTap = true;
+                                                initialCountry =
+                                                    widget.country[i];
+                                                initialPos = LatLng(
+                                                  double.parse(data.lat),
+                                                  double.parse(data.long),
+                                                );
+                                                controller.move(
+                                                    LatLng(
+                                                      double.parse(data.lat),
+                                                      double.parse(data.long),
+                                                    ),
+                                                    4.0);
+                                              });
+                                              print(widget
+                                                  .country[i].countryName);
+                                            },
+                                            child: Icon(
+                                              Icons.location_on,
+                                              color: int.parse(widget.country[i]
+                                                          .info.totalCases
+                                                          .replaceAll(
+                                                              ',', '')) >=
+                                                      10
+                                                  ? Colors.redAccent[100]
+                                                  : Colors.greenAccent[100],
+                                              size: 40.0,
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    }
+                                  }
+                                  return Marker();
+                                }),
                               )
                             ],
                           ),
@@ -218,8 +214,8 @@ class _MapsCoronaState extends State<MapsCorona> {
                             alignment: Alignment.bottomRight,
                             child: Padding(
                               padding: const EdgeInsets.only(
-                                right: 5.0,
-                                bottom: 5.0,
+                                right: 10.0,
+                                bottom: 10.0,
                               ),
                               child: IconButton(
                                 icon: Icon(

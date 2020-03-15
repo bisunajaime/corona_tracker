@@ -113,3 +113,19 @@ class MoreResults {
     );
   }
 }
+
+class LocationData {
+  final String country;
+  final String lat;
+  final String long;
+
+  LocationData({this.country, this.lat, this.long});
+
+  factory LocationData.fromJson(Map<String, dynamic> json) {
+    return LocationData(
+      country: json['country'],
+      lat: json['lat'],
+      long: json['long'],
+    );
+  }
+}

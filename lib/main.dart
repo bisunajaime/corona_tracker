@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 // import 'package:coronatracker/corona_maps.dart';
 import 'package:coronatracker/maps_corona.dart';
@@ -11,6 +12,7 @@ import 'package:coronatracker/widgets/total_deaths.dart';
 import 'package:coronatracker/widgets/total_recovered.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -20,6 +22,7 @@ import 'package:http/http.dart' as http;
 import 'package:retry/retry.dart';
 
 import 'models/results.dart';
+import 'package:latlong/latlong.dart';
 
 void main() => runApp(MyApp());
 
@@ -27,6 +30,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Corona Tracker',
@@ -58,6 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Map<String, dynamic> moreRes = {};
   // Map<MarkerId, Marker> newMarkers = <MarkerId, Marker>{};
   List<Placemark> pMarkData = [];
+  List<Marker> markers = [];
   List<Map<String, dynamic>> data = [];
 
   List<Country> country = [];
@@ -74,8 +79,12 @@ class _MyHomePageState extends State<MyHomePage> {
   ScrollController controller;
   TextEditingController textController = TextEditingController();
 
-  int loadListLength;
+  int loadListLength = 5;
 
+  List<MapsData> mapData;
+  List<LocationData> locData = [];
+
+  // TODO: JUST A MARK
   Future getCountries() async {
     _clearLists();
 
@@ -204,13 +213,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     jsonCountryData.add(countryJsonData);
-    // Loads placemarks for maps
-    country.forEach((ctry) {
-      print(ctry.countryName);
-    });
-    await loadMarkers();
     setState(() {
-      loadListLength = (country.length - (country.length - 5));
       loading = false;
       showReloadMsg = false;
     });
@@ -245,47 +248,47 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  loadMarkers() {
-    print('loading');
-    Timer.run(() {
-      setState(() {
-        pMarkData.clear();
-        showMapLoading = true;
-      });
-    });
-    try {
-      country.forEach((c) async {
-        List<Placemark> placemark = await retry(
-          () => Geolocator()
-              .placemarkFromAddress(
-                  "${c.countryName == "S. Korea" ? c.countryName.replaceAll('S. ', '') : c.countryName}")
-              .asStream()
-              .toList()
-              .then((x) {
-            print(x[0]);
-            return x[0];
-          }),
-          delayFactor: Duration(seconds: 1),
-          maxAttempts: 3,
-          maxDelay: Duration(seconds: 2),
-          onRetry: (e) {
-            print(e);
-          },
-          retryIf: (e) => e is PlatformException,
-        );
-        print(placemark.length);
-        pMarkData.add(placemark[0]);
-      });
-    } catch (e) {
-      print(e);
-    }
-
-    Timer(Duration(seconds: 15), () {
-      setState(() {
-        showMapLoading = false;
-      });
-    });
-  }
+//  loadMarkers() {
+//    print('loading');
+//    Timer.run(() {
+//      setState(() {
+//        pMarkData.clear();
+//        showMapLoading = true;
+//      });
+//    });
+//    try {
+//      country.forEach((c) async {
+//        List<Placemark> placemark = await retry(
+//          () => Geolocator()
+//              .placemarkFromAddress(
+//                  "${c.countryName == "S. Korea" ? c.countryName.replaceAll('S. ', '') : c.countryName}")
+//              .asStream()
+//              .toList()
+//              .then((x) {
+//            //print(x[0]);
+//            return x[0];
+//          }),
+//          delayFactor: Duration(seconds: 1),
+//          maxAttempts: 3,
+//          maxDelay: Duration(seconds: 2),
+//          onRetry: (e) {
+//            //print(e);
+//          },
+//          retryIf: (e) => e is PlatformException,
+//        );
+//        //print(placemark.length);
+//        pMarkData.add(placemark[0]);
+//      });
+//    } catch (e) {
+//      //print(e);
+//    }
+//
+//    Timer(Duration(seconds: 5), () {
+//      setState(() {
+//        showMapLoading = false;
+//      });
+//    });
+//  }
 
   @override
   void initState() {
@@ -301,9 +304,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _scrollListener() {
-    if (controller.position.pixels == controller.position.maxScrollExtent) {
+    //print(controller.position.pixels);
+    if (controller.position.extentAfter < 500) {
       Timer(Duration(milliseconds: 250), () {
-        print('exceede limit');
+        if (loadListLength < country.length + 1) {
+          setState(() {
+            loadListLength += 1;
+          });
+        }
+        print(loadListLength);
       });
     }
   }
@@ -315,17 +324,7 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.refresh),
-            onPressed: () {
-              pMarkData.forEach((f) async {
-                Future<List<Address>> g =
-                    Geocoder.local.findAddressesFromQuery(f.country);
-                await g.then((v) {
-                  print(v.first.coordinates);
-                }).catchError((onError) {
-                  print(onError);
-                });
-              });
-            },
+            onPressed: () {},
           )
         ],
         title: Column(
@@ -417,7 +416,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               MaterialButton(
                 color: Color(0xff374972),
-                onPressed: () => showMapLoading
+                onPressed: () => !showMapLoading
                     ? null
                     : Navigator.push(
                         context,
@@ -425,11 +424,12 @@ class _MyHomePageState extends State<MyHomePage> {
                           builder: (context) => MapsCorona(
                             placemarks: pMarkData,
                             country: country,
+                            markers: markers,
                           ),
                         ),
                       ),
                 child: ListTile(
-                  leading: showMapLoading
+                  leading: !showMapLoading
                       ? CircularProgressIndicator()
                       : Icon(
                           Icons.location_on,
