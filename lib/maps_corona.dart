@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:coronatracker/models/results.dart';
@@ -14,6 +15,9 @@ import 'package:flutter_map/plugin_api.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong/latlong.dart';
+import 'package:html/dom.dart' as dom;
+import 'package:html/parser.dart';
+import 'package:http/http.dart' as http;
 
 class MapsCorona extends StatefulWidget {
   final List<Placemark> placemarks;
@@ -33,6 +37,30 @@ class _MapsCoronaState extends State<MapsCorona> {
   MapController controller = MapController();
   Country initialCountry;
   List<Marker> markerList = [];
+  List<MapsData> mapData;
+
+  Future getMapData() async {
+    print('getting data');
+    http.Client client = http.Client();
+    http.Response response = await client
+        .get('https://coronavirus-tracker-api.herokuapp.com/confirmed');
+    var body = jsonDecode(response.body);
+    List<String> jsonCountry = [];
+    print('data received; LENGTH: ${body['locations'].length}');
+    for (int i = 0; i < body['locations'].length; i++) {
+      for (int x = 0; x < widget.country.length; x++) {
+        if (body['locations'][i]['country'] == widget.country[x].countryName) {
+          var dt = body['locations'][i]['country'];
+          jsonCountry.add(dt);
+        }
+      }
+      //print(body['locations'][i]['coordinates']['lat']);
+    }
+    List<String> strJson = jsonCountry.toSet().toList();
+
+    print(body['locations'].indexOf(body['locations'][0]['country']));
+    print(strJson.length);
+  }
 
   getMarkers(Country country) {
     widget.placemarks.forEach((placemark) {
@@ -116,6 +144,7 @@ class _MapsCoronaState extends State<MapsCorona> {
             icon: Icon(Icons.refresh),
             onPressed: () {
               print('reload');
+              getMapData();
             },
           )
         ],
@@ -375,6 +404,26 @@ class TextContainer extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class MapsData {
+  final Country country;
+  final String lat;
+  final String long;
+
+  MapsData({
+    this.country,
+    this.lat,
+    this.long,
+  });
+
+  factory MapsData.fromJson(Map<String, dynamic> json) {
+    return MapsData(
+      country: json['country'],
+      lat: json['lat'],
+      long: json['long'],
     );
   }
 }

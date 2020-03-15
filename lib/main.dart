@@ -522,6 +522,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Scrollbar(
                       controller: ScrollController(),
                       child: ListView.builder(
+                        // TODO: Lazy Load
                         controller: controller,
                         physics: BouncingScrollPhysics(),
                         itemCount: country.length,
