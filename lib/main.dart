@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:coronatracker/latest_updates.dart';
 import 'package:coronatracker/maps_corona.dart';
 import 'package:coronatracker/more_info.dart';
 import 'package:coronatracker/widgets/active_cases.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 import 'models/results.dart';
 
@@ -80,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController textController = TextEditingController();
 
   int loadListLength = 5;
+  DateTime date = DateTime.now();
 
   List<MapsData> mapData;
   List<LocationData> locData = [];
@@ -216,6 +219,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       loading = false;
       showReloadMsg = false;
+      date = DateTime.now();
     });
   }
 
@@ -337,7 +341,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 fontSize: 15,
                 color: Colors.cyanAccent,
               ),
-            )
+            ),
           ],
         ),
         centerTitle: true,
@@ -385,9 +389,38 @@ class _MyHomePageState extends State<MyHomePage> {
                           fontFamily: 'Lato-Bold',
                           fontSize: 20,
                         ),
-                      )
+                      ),
+                      SizedBox(
+                        height: 10.0,
+                      ),
+                      Text(
+                        '${DateFormat('yMMMMd').add_jm().format(date)}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Lato-Regular',
+                        ),
+                      ),
                     ],
                   ),
+                ),
+              ),
+              MaterialButton(
+                color: Color(0xff374972),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LatestUpdates(),
+                  ),
+                ),
+                child: ListTile(
+                  title: Text(
+                    'Latest Updates',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Lato-Regular',
+                    ),
+                  ),
+                  leading: Icon(Icons.assessment, color: Colors.orangeAccent),
                 ),
               ),
               MaterialButton(
@@ -444,7 +477,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -483,45 +516,61 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             )
           : Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.all(10.0),
-                  child: TextField(
-                    controller: textController,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Lato-Regular',
-                    ),
-                    decoration: InputDecoration(
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          Icons.backspace,
-                          color: Colors.grey[200],
-                        ),
-                        tooltip: 'Clear',
-                        onPressed: () {
-                          textController.clear();
-                        },
-                      ),
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: Colors.white,
-                      ),
-                      filled: true,
-                      fillColor: Color(0xff1d2c4d),
-                      hintText: 'Search a country',
-                      hintStyle: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Lato-Regular',
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5),
-                        borderSide: BorderSide(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      TextField(
+                        controller: textController,
+                        style: TextStyle(
                           color: Colors.white,
-                          width: 1.0,
+                          fontFamily: 'Lato-Regular',
+                        ),
+                        decoration: InputDecoration(
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              Icons.backspace,
+                              color: Colors.grey[200],
+                            ),
+                            tooltip: 'Clear',
+                            onPressed: () {
+                              textController.clear();
+                            },
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: Colors.white,
+                          ),
+                          filled: true,
+                          fillColor: Color(0xff1d2c4d),
+                          hintText: 'Search a country',
+                          hintStyle: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Lato-Regular',
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5),
+                            borderSide: BorderSide(
+                              color: Colors.white,
+                              width: 1.0,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      SizedBox(
+                        height: 10.0,
+                      ),
+                      Text(
+                        'As of ${DateFormat('yMMMMd').add_jm().format(date)}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Lato-Black',
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Expanded(
