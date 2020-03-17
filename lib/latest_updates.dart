@@ -32,20 +32,11 @@ class _LatestUpdatesState extends State<LatestUpdates> {
     Map<String, dynamic> listUpdateData = {};
     List<String> storedStrong = [];
     children.forEach((child) {
-      // check if child has id of newsdateDATE
       if (child.id.trim().length != 0 && child.children.length > 1) {
-        // add id to theData
         child.getElementsByTagName('li').forEach((li) {
-          String strString = '';
-          li.getElementsByTagName('strong').forEach((str) {
-            strString += "${_filterText(str.innerHtml)} ";
-          });
-          //print(strString);
-          storedStrong.add(strString);
-          //print('break');
+          storedStrong
+              .add(_filterText(parse(li.innerHtml).documentElement.text));
         });
-        print(storedStrong);
-        print('#############################');
         listUpdateData['${child.id}'] = {
           'date': "${child.id}",
           'news_post': storedStrong,
@@ -54,11 +45,7 @@ class _LatestUpdatesState extends State<LatestUpdates> {
             .add(LatestUpdatesData.fromJson(listUpdateData['${child.id}']));
         listUpdateData.clear();
         storedStrong.clear();
-        //print(storedStrong.length);
       }
-    });
-    latestUpdatesList.forEach((data) {
-      print(data.newsPost.length);
     });
     setState(() {
       loading = false;
@@ -71,7 +58,7 @@ class _LatestUpdatesState extends State<LatestUpdates> {
         .replaceAll('</strong>', '')
         .replaceAll('&nbsp;', '')
         .replaceAll('<sup>', '')
-        .replaceAll('</sup>', '');
+        .replaceAll('[source]', '');
     return newText;
   }
 
@@ -165,19 +152,30 @@ class _LatestUpdatesState extends State<LatestUpdates> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.all(5.0),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10.0,
+                                vertical: 5.0,
+                              ),
+                              margin: EdgeInsets.only(
+                                top: 5.0,
+                                left: 5.0,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.orange,
+                                borderRadius: BorderRadius.circular(50),
+                              ),
                               child: Text(
                                 '$date',
                                 style: TextStyle(
-                                  fontFamily: 'Lato-Bold',
-                                  color: Colors.white,
+                                  fontFamily: 'Lato-Black',
+                                  color: Colors.black,
                                   fontSize: 20.0,
                                 ),
                               ),
                             ),
                             SizedBox(
-                              height: 10.0,
+                              height: 5.0,
                             ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
