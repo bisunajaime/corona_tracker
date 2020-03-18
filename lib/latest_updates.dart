@@ -31,22 +31,37 @@ class _LatestUpdatesState extends State<LatestUpdates> {
     List<dom.Element> children = news_block.children;
     Map<String, dynamic> listUpdateData = {};
     List<String> storedStrong = [];
-    children.forEach((child) {
-      if (child.id.trim().length != 0 && child.children.length > 1) {
-        child.getElementsByTagName('li').forEach((li) {
-          storedStrong
-              .add(_filterText(parse(li.innerHtml).documentElement.text));
-        });
-        listUpdateData['${child.id}'] = {
-          'date': "${child.id}",
-          'news_post': storedStrong,
-        };
-        latestUpdatesList
-            .add(LatestUpdatesData.fromJson(listUpdateData['${child.id}']));
-        listUpdateData.clear();
-        storedStrong.clear();
-      }
+    print(document.querySelectorAll("[id*='newsdate']").length);
+    document.querySelectorAll("[id*='newsdate']").forEach((newsDate) {
+      //print(newsDate.id);
+      //print(newsDate.children);
+      newsDate.children.forEach((news) {
+        //print(parse(news.innerHtml).documentElement.text);
+        if (news.querySelectorAll('.news_post').length != 1) {
+          if (!news.id.contains('newsdate')) {
+            storedStrong
+                .add(_filterText(parse(news.innerHtml).documentElement.text));
+            //print(storedStrong.length);
+          }
+        } else {
+          print('nope');
+        }
+      });
+      listUpdateData['${newsDate.id}'] = {
+        'date': '${newsDate.id}',
+        'news_post': storedStrong,
+      };
+      latestUpdatesList
+          .add(LatestUpdatesData.fromJson(listUpdateData['${newsDate.id}']));
+      listUpdateData.clear();
+      storedStrong.clear();
+      print(true);
     });
+
+    latestUpdatesList.removeLast();
+    latestUpdatesList.removeLast();
+    latestUpdatesList.removeLast();
+    latestUpdatesList.removeLast();
     setState(() {
       loading = false;
     });
@@ -102,39 +117,42 @@ class _LatestUpdatesState extends State<LatestUpdates> {
             )
           : Column(
               children: <Widget>[
-                TextField(
-                  controller: textController,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Lato-Regular',
-                  ),
-                  decoration: InputDecoration(
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        Icons.backspace,
-                        color: Colors.grey[200],
-                      ),
-                      tooltip: 'Clear',
-                      onPressed: () {
-                        textController.clear();
-                      },
-                    ),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Colors.white,
-                    ),
-                    filled: true,
-                    fillColor: Color(0xff1d2c4d),
-                    hintText: 'Search a country',
-                    hintStyle: TextStyle(
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: TextField(
+                    controller: textController,
+                    style: TextStyle(
                       color: Colors.white,
                       fontFamily: 'Lato-Regular',
                     ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5),
-                      borderSide: BorderSide(
+                    decoration: InputDecoration(
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.backspace,
+                          color: Colors.grey[200],
+                        ),
+                        tooltip: 'Clear',
+                        onPressed: () {
+                          textController.clear();
+                        },
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
                         color: Colors.white,
-                        width: 1.0,
+                      ),
+                      filled: true,
+                      fillColor: Color(0xff1d2c4d),
+                      hintText: 'Search a country',
+                      hintStyle: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Lato-Regular',
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5),
+                        borderSide: BorderSide(
+                          color: Colors.white,
+                          width: 1.0,
+                        ),
                       ),
                     ),
                   ),
@@ -162,7 +180,7 @@ class _LatestUpdatesState extends State<LatestUpdates> {
                                 left: 5.0,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.orange,
+                                color: Colors.purple[100],
                                 borderRadius: BorderRadius.circular(50),
                               ),
                               child: Text(

@@ -10,7 +10,6 @@ import 'package:coronatracker/widgets/total_cases.dart';
 import 'package:coronatracker/widgets/total_deaths.dart';
 import 'package:coronatracker/widgets/total_recovered.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
@@ -25,7 +24,6 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     return GestureDetector(
       onTap: () {
         FocusScopeNode currentFocus = FocusScope.of(context);
@@ -103,7 +101,9 @@ class _MyHomePageState extends State<MyHomePage> {
     var document = parse(response.body);
 
     // print data
-    List<dom.Element> totalCases = document.getElementsByTagName('td');
+    List<dom.Element> totalCases = document
+        .querySelectorAll('#main_table_countries_today > tbody > tr > td');
+    print(totalCases);
 
     for (int x = 0; x < totalCases.length; x++) {
       // adds to countriesList
