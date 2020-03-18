@@ -16,6 +16,7 @@ class _LatestUpdatesState extends State<LatestUpdates> {
   bool loading = true;
   TextEditingController textController = new TextEditingController();
   String filterTxt = '';
+  DateTime date = DateTime.now();
 
   Future getUpdates() async {
     setState(() {
@@ -47,9 +48,10 @@ class _LatestUpdatesState extends State<LatestUpdates> {
           print('nope');
         }
       });
+      List<String> removeDups = storedStrong.toSet().toList();
       listUpdateData['${newsDate.id}'] = {
         'date': '${newsDate.id}',
-        'news_post': storedStrong,
+        'news_post': removeDups,
       };
       latestUpdatesList
           .add(LatestUpdatesData.fromJson(listUpdateData['${newsDate.id}']));
@@ -73,7 +75,8 @@ class _LatestUpdatesState extends State<LatestUpdates> {
         .replaceAll('</strong>', '')
         .replaceAll('&nbsp;', '')
         .replaceAll('<sup>', '')
-        .replaceAll('[source]', '');
+        .replaceAll('[source]', '')
+        .trim();
     return newText;
   }
 
@@ -93,11 +96,26 @@ class _LatestUpdatesState extends State<LatestUpdates> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Latest Updates',
-          style: TextStyle(
-            fontFamily: 'Lato-Black',
-          ),
+        title: Column(
+          children: <Widget>[
+            Text(
+              'Latest Updates',
+              style: TextStyle(
+                fontFamily: 'Lato-Black',
+              ),
+            ),
+            SizedBox(
+              height: 5.0,
+            ),
+            Text(
+              'As of ${DateFormat.yMMMd().add_jm().format(date)}',
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'Lato-Bold',
+                fontSize: 12.0,
+              ),
+            )
+          ],
         ),
         centerTitle: true,
         backgroundColor: Color(0xff0B1836),
@@ -177,10 +195,10 @@ class _LatestUpdatesState extends State<LatestUpdates> {
                               ),
                               margin: EdgeInsets.only(
                                 top: 5.0,
-                                left: 5.0,
+                                left: 10.0,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.purple[100],
+                                color: Colors.lightBlue[200],
                                 borderRadius: BorderRadius.circular(50),
                               ),
                               child: Text(
@@ -205,19 +223,28 @@ class _LatestUpdatesState extends State<LatestUpdates> {
                                           .toLowerCase()
                                           .contains(filterTxt.toLowerCase())
                                       ? Container(
-                                          margin: EdgeInsets.all(5),
+                                          margin: EdgeInsets.symmetric(
+                                            horizontal: 10.0,
+                                            vertical: 5.0,
+                                          ),
                                           padding: EdgeInsets.all(5),
                                           decoration: BoxDecoration(
-                                            color: Color(0xff0B1836),
-                                            borderRadius:
-                                                BorderRadius.circular(5),
-                                          ),
+                                              color: Color(0xff0B1836),
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  blurRadius: 5.0,
+                                                  color: Colors.black38,
+                                                )
+                                              ]),
                                           child: Text(
                                             '${latestUpdatesList[i].newsPost[x]}',
+                                            textAlign: TextAlign.justify,
                                             style: TextStyle(
                                               color: Colors.white70,
                                               fontFamily: 'Lato-Regular',
-                                              fontSize: 17.0,
+                                              fontSize: 12.5,
                                             ),
                                           ),
                                         )
