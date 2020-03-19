@@ -62,8 +62,6 @@ class _LatestUpdatesState extends State<LatestUpdates> {
 
     latestUpdatesList.removeLast();
     latestUpdatesList.removeLast();
-    latestUpdatesList.removeLast();
-    latestUpdatesList.removeLast();
     setState(() {
       loading = false;
     });
@@ -118,19 +116,19 @@ class _LatestUpdatesState extends State<LatestUpdates> {
           ],
         ),
         centerTitle: true,
-        backgroundColor: Color(0xff0B1836),
+        backgroundColor: const Color(0xff0B1836),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: getUpdates,
-        backgroundColor: Color(0xff0B1836),
-        child: Icon(
+        backgroundColor: const Color(0xff0B1836),
+        child: const Icon(
           Icons.refresh,
           color: Colors.white,
         ),
       ),
-      backgroundColor: Color(0xff374972),
+      backgroundColor: const Color(0xff374972),
       body: loading
-          ? Center(
+          ? const Center(
               child: CircularProgressIndicator(),
             )
           : Column(
@@ -139,7 +137,7 @@ class _LatestUpdatesState extends State<LatestUpdates> {
                   padding: const EdgeInsets.all(10.0),
                   child: TextField(
                     controller: textController,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontFamily: 'Lato-Regular',
                     ),
@@ -154,14 +152,14 @@ class _LatestUpdatesState extends State<LatestUpdates> {
                           textController.clear();
                         },
                       ),
-                      prefixIcon: Icon(
+                      prefixIcon: const Icon(
                         Icons.search,
                         color: Colors.white,
                       ),
                       filled: true,
-                      fillColor: Color(0xff1d2c4d),
+                      fillColor: const Color(0xff1d2c4d),
                       hintText: 'Search a country',
-                      hintStyle: TextStyle(
+                      hintStyle: const TextStyle(
                         color: Colors.white,
                         fontFamily: 'Lato-Regular',
                       ),
@@ -189,11 +187,11 @@ class _LatestUpdatesState extends State<LatestUpdates> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Container(
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                 horizontal: 10.0,
                                 vertical: 5.0,
                               ),
-                              margin: EdgeInsets.only(
+                              margin: const EdgeInsets.only(
                                 top: 5.0,
                                 left: 10.0,
                               ),
@@ -203,14 +201,14 @@ class _LatestUpdatesState extends State<LatestUpdates> {
                               ),
                               child: Text(
                                 '$date',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontFamily: 'Lato-Black',
                                   color: Colors.black,
                                   fontSize: 20.0,
                                 ),
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 5.0,
                             ),
                             Column(
@@ -223,11 +221,11 @@ class _LatestUpdatesState extends State<LatestUpdates> {
                                           .toLowerCase()
                                           .contains(filterTxt.toLowerCase())
                                       ? Container(
-                                          margin: EdgeInsets.symmetric(
+                                          margin: const EdgeInsets.symmetric(
                                             horizontal: 10.0,
                                             vertical: 5.0,
                                           ),
-                                          padding: EdgeInsets.all(5),
+                                          padding: const EdgeInsets.all(5),
                                           decoration: BoxDecoration(
                                               color: Color(0xff0B1836),
                                               borderRadius:

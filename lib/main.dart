@@ -100,10 +100,9 @@ class _MyHomePageState extends State<MyHomePage> {
         await client.get('https://www.worldometers.info/coronavirus/');
     var document = parse(response.body);
 
-    // print data
     List<dom.Element> totalCases = document
         .querySelectorAll('#main_table_countries_today > tbody > tr > td');
-    print(totalCases);
+    // print(totalCases);
 
     for (int x = 0; x < totalCases.length; x++) {
       // adds to countriesList
@@ -220,6 +219,7 @@ class _MyHomePageState extends State<MyHomePage> {
       loading = false;
       showReloadMsg = false;
       date = DateTime.now();
+      loadListLength = 5;
     });
   }
 
@@ -310,13 +310,12 @@ class _MyHomePageState extends State<MyHomePage> {
   void _scrollListener() {
     //print(controller.position.pixels);
     if (controller.position.extentAfter < 500) {
-      Timer(Duration(milliseconds: 250), () {
-        if (loadListLength < country.length + 1) {
-          setState(() {
-            loadListLength += 1;
-          });
-        }
-        print(loadListLength);
+      Timer(Duration(milliseconds: 50), () {
+        setState(() {
+          loadListLength < country.length
+              ? loadListLength += 1
+              : loadListLength = country.length;
+        });
       });
     }
   }
@@ -580,6 +579,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: ListView.builder(
                         // TODO: Lazy Load
                         physics: BouncingScrollPhysics(),
+                        controller: controller,
                         itemCount: country.length,
                         itemBuilder: (context, i) {
                           Country c = country[i];
