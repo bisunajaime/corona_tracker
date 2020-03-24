@@ -1,6 +1,5 @@
 import 'package:coronatracker/models/results.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MoreInfo extends StatefulWidget {
   final MoreResults results;

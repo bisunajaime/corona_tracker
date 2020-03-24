@@ -32,7 +32,7 @@ class _LatestUpdatesState extends State<LatestUpdates> {
     List<dom.Element> children = news_block.children;
     Map<String, dynamic> listUpdateData = {};
     List<String> storedStrong = [];
-    print(document.querySelectorAll("[id*='newsdate']").length);
+    
     document.querySelectorAll("[id*='newsdate']").forEach((newsDate) {
       //print(newsDate.id);
       //print(newsDate.children);
