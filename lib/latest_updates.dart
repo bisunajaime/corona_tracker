@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
+import 'package:coronatracker/constants/constants.dart';
 
 class LatestUpdates extends StatefulWidget {
   @override
@@ -28,8 +28,6 @@ class _LatestUpdatesState extends State<LatestUpdates> {
     http.Response response =
         await client.get('https://www.worldometers.info/coronavirus/');
     var document = parse(response.body);
-    dom.Element news_block = document.getElementById('news_block');
-    List<dom.Element> children = news_block.children;
     Map<String, dynamic> listUpdateData = {};
     List<String> storedStrong = [];
     print(document.querySelectorAll("[id*='newsdate']").length);
@@ -108,7 +106,7 @@ class _LatestUpdatesState extends State<LatestUpdates> {
             Text(
               'As of ${DateFormat.yMMMd().add_jm().format(date)}',
               style: TextStyle(
-                color: Colors.white,
+                color: eggShell,
                 fontFamily: 'Lato-Bold',
                 fontSize: 12.0,
               ),
@@ -116,7 +114,7 @@ class _LatestUpdatesState extends State<LatestUpdates> {
           ],
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xff0B1836),
+        backgroundColor: yankeesBlue,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: getUpdates,
@@ -126,7 +124,7 @@ class _LatestUpdatesState extends State<LatestUpdates> {
           color: Colors.white,
         ),
       ),
-      backgroundColor: const Color(0xff374972),
+      backgroundColor: eerieBlack,
       body: loading
           ? const Center(
               child: CircularProgressIndicator(),
@@ -140,12 +138,15 @@ class _LatestUpdatesState extends State<LatestUpdates> {
                     style: const TextStyle(
                       color: Colors.white,
                       fontFamily: 'Lato-Regular',
+                      fontSize: 15,
                     ),
                     decoration: InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(vertical: 10.0),
                       suffixIcon: IconButton(
                         icon: Icon(
                           Icons.backspace,
                           color: Colors.grey[200],
+                          size: 20.0,
                         ),
                         tooltip: 'Clear',
                         onPressed: () {
@@ -155,13 +156,15 @@ class _LatestUpdatesState extends State<LatestUpdates> {
                       prefixIcon: const Icon(
                         Icons.search,
                         color: Colors.white,
+                        size: 20.0,
                       ),
                       filled: true,
-                      fillColor: const Color(0xff1d2c4d),
+                      fillColor: shadowBlue,
                       hintText: 'Search a country',
                       hintStyle: const TextStyle(
                         color: Colors.white,
                         fontFamily: 'Lato-Regular',
+                        fontSize: 15,
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5),
@@ -188,23 +191,23 @@ class _LatestUpdatesState extends State<LatestUpdates> {
                           children: <Widget>[
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 10.0,
-                                vertical: 5.0,
+                                horizontal: 20.0,
+                                vertical: 10.0,
                               ),
                               margin: const EdgeInsets.only(
                                 top: 5.0,
                                 left: 10.0,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.lightBlue[200],
+                                color: yankeesBlue,
                                 borderRadius: BorderRadius.circular(50),
                               ),
                               child: Text(
                                 '$date',
                                 style: const TextStyle(
                                   fontFamily: 'Lato-Black',
-                                  color: Colors.black,
-                                  fontSize: 20.0,
+                                  color: Colors.white,
+                                  fontSize: 15.0,
                                 ),
                               ),
                             ),
@@ -227,7 +230,7 @@ class _LatestUpdatesState extends State<LatestUpdates> {
                                           ),
                                           padding: const EdgeInsets.all(5),
                                           decoration: BoxDecoration(
-                                              color: Color(0xff0B1836),
+                                              color: deepSpaceSparkle,
                                               borderRadius:
                                                   BorderRadius.circular(5),
                                               boxShadow: [
@@ -240,7 +243,7 @@ class _LatestUpdatesState extends State<LatestUpdates> {
                                             '${latestUpdatesList[i].newsPost[x]}',
                                             textAlign: TextAlign.justify,
                                             style: TextStyle(
-                                              color: Colors.white70,
+                                              color: eggShell,
                                               fontFamily: 'Lato-Regular',
                                               fontSize: 12.5,
                                             ),

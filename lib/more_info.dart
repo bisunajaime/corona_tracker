@@ -1,6 +1,6 @@
 import 'package:coronatracker/models/results.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:coronatracker/constants/constants.dart';
 
 class MoreInfo extends StatefulWidget {
   final MoreResults results;
@@ -20,8 +20,8 @@ class _MoreInfoState extends State<MoreInfo> {
 
   @override
   Widget build(BuildContext context) {
-    Color darkBlue = Color(0xff131C2F);
-    Color lightBlue = Color(0xff375087);
+    Color darkBlue = yankeesBlue;
+    Color lightBlue = eerieBlack;
 
     return Scaffold(
       appBar: AppBar(
@@ -145,7 +145,6 @@ class InfoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color darkBlue = Color(0xff1C2844);
     BoxShadow defaultShadow = BoxShadow(
       blurRadius: 10.0,
       color: Colors.black45,
@@ -161,7 +160,7 @@ class InfoWidget extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(5),
           boxShadow: [defaultShadow],
-          color: darkBlue,
+          color: yankeesBlue,
         ),
         child: Column(
           crossAxisAlignment: !isCentered

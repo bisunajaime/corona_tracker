@@ -1,3 +1,4 @@
+import 'package:coronatracker/constants/constants.dart';
 import 'package:flutter/material.dart';
 
 class SeriousCritical extends StatelessWidget {
@@ -32,7 +33,7 @@ class SeriousCritical extends StatelessWidget {
           vertical: isRow ? 15.0 : 15,
         ),
         decoration: BoxDecoration(
-          color: Color(0xff131C2F),
+          color: eerieBlack,
           borderRadius: BorderRadius.circular(5),
           boxShadow: [
             BoxShadow(

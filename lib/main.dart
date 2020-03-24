@@ -15,6 +15,7 @@ import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'constants/constants.dart';
 
 import 'models/results.dart';
 
@@ -338,17 +339,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Lato-Regular',
                 fontSize: 15,
-                color: Colors.cyanAccent,
+                color: eggShell,
               ),
             ),
           ],
         ),
         centerTitle: true,
-        backgroundColor: Color(0xff1d2c4d),
+        backgroundColor: yankeesBlue,
       ),
       drawer: Drawer(
         child: Container(
-          color: Color(0xff1C2844),
+          color: yankeesBlue,
           child: Column(
             children: <Widget>[
               Container(
@@ -356,9 +357,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 height: 200,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                     colors: [
-                      Color(0xff0B1836),
-                      Color(0xff000F30),
+                      eerieBlack,
+                      yankeesBlue,
                     ],
                   ),
                 ),
@@ -384,9 +387,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         '${country.length} \nAffected Areas',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.yellow,
-                          fontFamily: 'Lato-Bold',
-                          fontSize: 20,
+                          color: eggShell,
+                          fontFamily: 'Lato-Black',
+                          fontSize: 15,
                         ),
                       ),
                       SizedBox(
@@ -397,6 +400,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         style: TextStyle(
                           color: Colors.white,
                           fontFamily: 'Lato-Regular',
+                          fontSize: 10.0,
                         ),
                       ),
                     ],
@@ -404,26 +408,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               MaterialButton(
-                color: Color(0xff374972),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LatestUpdates(),
-                  ),
-                ),
-                child: ListTile(
-                  title: Text(
-                    'Latest Updates',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Lato-Regular',
-                    ),
-                  ),
-                  leading: Icon(Icons.assessment, color: Colors.orangeAccent),
-                ),
-              ),
-              MaterialButton(
-                color: Color(0xff374972),
+                color: eerieBlack,
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -440,16 +425,35 @@ class _MyHomePageState extends State<MyHomePage> {
                           color: Colors.redAccent[100],
                         ),
                   title: Text(
-                    '${loading ? 'Loading' : 'More'} Information',
+                    '${loading ? 'Loading' : 'World'} Totals',
                     style: TextStyle(
                       color: Colors.white,
-                      fontFamily: 'Lato-Regular',
+                      fontFamily: 'Lato-Bold',
                     ),
                   ),
                 ),
               ),
               MaterialButton(
-                color: Color(0xff374972),
+                color: eerieBlack,
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LatestUpdates(),
+                  ),
+                ),
+                child: ListTile(
+                  title: Text(
+                    'Latest Updates',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Lato-Bold',
+                    ),
+                  ),
+                  leading: Icon(Icons.assessment, color: Colors.orangeAccent),
+                ),
+              ),
+              MaterialButton(
+                color: eerieBlack,
                 onPressed: () => !showMapLoading
                     ? null
                     : Navigator.push(
@@ -472,7 +476,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     'Open Maps',
                     style: TextStyle(
                       color: Colors.white,
-                      fontFamily: 'Lato-Regular',
+                      fontFamily: 'Lato-Bold',
                     ),
                   ),
                 ),
@@ -485,12 +489,12 @@ class _MyHomePageState extends State<MyHomePage> {
           ? null
           : FloatingActionButton(
               onPressed: getCountries,
-              backgroundColor: Color(0xff375087),
+              backgroundColor: yankeesBlue,
               child: Icon(
                 Icons.refresh,
               ),
             ),
-      backgroundColor: Color(0xff375087),
+      backgroundColor: eerieBlack,
       body: loading
           ? Center(
               child: Column(
@@ -526,13 +530,16 @@ class _MyHomePageState extends State<MyHomePage> {
                         controller: textController,
                         style: TextStyle(
                           color: Colors.white,
-                          fontFamily: 'Lato-Regular',
+                          fontFamily: 'Lato-Bold',
+                          fontSize: 15.0,
                         ),
                         decoration: InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(vertical: 10.0),
                           suffixIcon: IconButton(
                             icon: Icon(
                               Icons.backspace,
                               color: Colors.grey[200],
+                              size: 20,
                             ),
                             tooltip: 'Clear',
                             onPressed: () {
@@ -542,13 +549,15 @@ class _MyHomePageState extends State<MyHomePage> {
                           prefixIcon: Icon(
                             Icons.search,
                             color: Colors.white,
+                            size: 20,
                           ),
                           filled: true,
-                          fillColor: Color(0xff1d2c4d),
+                          fillColor: shadowBlue,
                           hintText: 'Search a country',
                           hintStyle: TextStyle(
                             color: Colors.white,
-                            fontFamily: 'Lato-Regular',
+                            fontFamily: 'Lato-Bold',
+                            fontSize: 15.0,
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(5),
@@ -565,7 +574,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       Text(
                         'As of ${DateFormat('yMMMMd').add_jm().format(date)}',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: eggShell,
                           fontFamily: 'Lato-Black',
                         ),
                       ),
@@ -628,7 +637,7 @@ class DataWidget extends StatelessWidget {
       ),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Color(0xff1d2c4d),
+        color: yankeesBlue,
         borderRadius: BorderRadius.circular(5),
         boxShadow: [
           BoxShadow(
