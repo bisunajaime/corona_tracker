@@ -107,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     for (int x = 0; x < totalCases.length; x++) {
       // adds to countriesList
-      if (x % 10 == 0) {
+      if (x % 11 == 0) {
         if (totalCases[x].innerHtml.contains('<a')) {
           countriesList.add(totalCases[x].querySelector('a').innerHtml.trim());
         } else if (totalCases[x].innerHtml.contains('<span')) {
@@ -118,11 +118,11 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       }
       // adds to totalCasesList
-      else if (x % 10 == 1) {
+      else if (x % 11 == 1) {
         totalCasesList.add(totalCases[x].innerHtml.trim());
       }
       // adds to newCasesList
-      else if (x % 10 == 2) {
+      else if (x % 11 == 2) {
         if (totalCases[x].innerHtml.trim().length != 0) {
           newCasesList.add(totalCases[x].innerHtml.trim());
         } else {
@@ -130,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       }
       // adds to totalDeathsList
-      else if (x % 10 == 3) {
+      else if (x % 11 == 3) {
         if (totalCases[x].innerHtml.trim().length != 0) {
           totalDeathsList.add(totalCases[x].innerHtml.trim());
         } else {
@@ -138,7 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       }
       // adds to newDeathsList
-      else if (x % 10 == 4) {
+      else if (x % 11 == 4) {
         if (totalCases[x].innerHtml.trim().length != 0) {
           newDeathsList.add(totalCases[x].innerHtml.trim());
         } else {
@@ -146,7 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       }
       // adds to totalRecovered
-      else if (x % 10 == 5) {
+      else if (x % 11 == 5) {
         if (totalCases[x].innerHtml.trim().length != 0) {
           totalRecovered.add(totalCases[x].innerHtml.trim());
         } else {
@@ -154,7 +154,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       }
       // adds to activeCasesList
-      else if (x % 10 == 6) {
+      else if (x % 11 == 6) {
         if (totalCases[x].innerHtml.trim().length != 0) {
           activeCasesList.add(totalCases[x].innerHtml.trim());
         } else {
@@ -162,7 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       }
       // adds to seriousCriticalList
-      else if (x % 10 == 7) {
+      else if (x % 11 == 7) {
         if (totalCases[x].innerHtml.trim().length != 0) {
           seriousCriticalList.add(totalCases[x].innerHtml.trim());
         } else {
