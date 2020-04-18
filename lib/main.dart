@@ -11,10 +11,13 @@ import 'package:coronatracker/widgets/total_deaths.dart';
 import 'package:coronatracker/widgets/total_recovered.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'constants/constants.dart';
 
 import 'models/results.dart';
 
@@ -100,75 +103,98 @@ class _MyHomePageState extends State<MyHomePage> {
         await client.get('https://www.worldometers.info/coronavirus/');
     var document = parse(response.body);
 
-    List<dom.Element> totalCases = document
-        .querySelectorAll('#main_table_countries_today > tbody > tr > td');
-    // print(totalCases);
+    List<dom.Element> totalCases =
+        document.querySelectorAll('#main_table_countries_today > tbody > tr');
+    print(totalCases[0].attributes);
+    print(totalCases.length);
+    for (int i = 0; i < totalCases.length; i++) {
+      if (!totalCases[i].attributes.containsKey('data-continent')) {
+        //print(totalCases[i].innerHtml);
+      }
+    }
 
     for (int x = 0; x < totalCases.length; x++) {
       // adds to countriesList
-      if (x % 10 == 0) {
-        if (totalCases[x].innerHtml.contains('<a')) {
-          countriesList.add(totalCases[x].querySelector('a').innerHtml.trim());
-        } else if (totalCases[x].innerHtml.contains('<span')) {
-          countriesList
-              .add(totalCases[x].querySelector('span').innerHtml.trim());
-        } else {
-          countriesList.add(totalCases[x].innerHtml.trim());
+      if (!totalCases[x].attributes.containsKey('data-continent')) {
+        List<dom.Element> t = totalCases[x].querySelectorAll('td');
+        //print(t.length);
+        for (int j = 0; j < t.length; j++) {
+          if (!t[j].attributes.containsKey('data-continent')) {
+            if (j % 12 == 0) {
+              if (t[j].innerHtml.contains('<a')) {
+                countriesList.add(t[j].querySelector('a').innerHtml.trim());
+              } else if (t[j].innerHtml.contains('<span')) {
+                countriesList.add(t[j].querySelector('span').innerHtml.trim());
+              } else {
+                countriesList.add(t[j].innerHtml.trim());
+              }
+            }
+            // adds to totalCasesList
+            else if (j % 12 == 1) {
+              totalCasesList.add(t[j].innerHtml.trim());
+            }
+            // adds to newCasesList
+            else if (j % 12 == 2) {
+              if (t[j].innerHtml.trim().length != 0) {
+                newCasesList.add(t[j].innerHtml.trim());
+              } else {
+                newCasesList.add('NO');
+              }
+            }
+            // adds to totalDeathsList
+            else if (j % 12 == 3) {
+              if (t[j].innerHtml.trim().length != 0) {
+                totalDeathsList.add(t[j].innerHtml.trim());
+              } else {
+                totalDeathsList.add('NONE');
+              }
+            }
+            // adds to newDeathsList
+            else if (j % 12 == 4) {
+              if (t[j].innerHtml.trim().length != 0) {
+                newDeathsList.add(t[j].innerHtml.trim());
+              } else {
+                newDeathsList.add('NO');
+              }
+            }
+            // adds to totalRecovered
+            else if (j % 12 == 5) {
+              if (t[j].innerHtml.trim().length != 0) {
+                totalRecovered.add(t[j].innerHtml.trim());
+              } else {
+                totalRecovered.add('NONE');
+              }
+            }
+            // adds to activeCasesList
+            else if (j % 12 == 6) {
+              if (t[j].innerHtml.trim().length != 0) {
+                activeCasesList.add(t[j].innerHtml.trim());
+              } else {
+                activeCasesList.add('NONE');
+              }
+            }
+            // adds to seriousCriticalList
+            else if (j % 12 == 7) {
+              if (t[j].innerHtml.trim().length != 0) {
+                seriousCriticalList.add(t[j].innerHtml.trim());
+              } else {
+                seriousCriticalList.add('NONE');
+              }
+            }
+          }
         }
-      }
-      // adds to totalCasesList
-      else if (x % 10 == 1) {
-        totalCasesList.add(totalCases[x].innerHtml.trim());
-      }
-      // adds to newCasesList
-      else if (x % 10 == 2) {
-        if (totalCases[x].innerHtml.trim().length != 0) {
-          newCasesList.add(totalCases[x].innerHtml.trim());
-        } else {
-          newCasesList.add('NO');
-        }
-      }
-      // adds to totalDeathsList
-      else if (x % 10 == 3) {
-        if (totalCases[x].innerHtml.trim().length != 0) {
-          totalDeathsList.add(totalCases[x].innerHtml.trim());
-        } else {
-          totalDeathsList.add('NONE');
-        }
-      }
-      // adds to newDeathsList
-      else if (x % 10 == 4) {
-        if (totalCases[x].innerHtml.trim().length != 0) {
-          newDeathsList.add(totalCases[x].innerHtml.trim());
-        } else {
-          newDeathsList.add('NO');
-        }
-      }
-      // adds to totalRecovered
-      else if (x % 10 == 5) {
-        if (totalCases[x].innerHtml.trim().length != 0) {
-          totalRecovered.add(totalCases[x].innerHtml.trim());
-        } else {
-          totalRecovered.add('NONE');
-        }
-      }
-      // adds to activeCasesList
-      else if (x % 10 == 6) {
-        if (totalCases[x].innerHtml.trim().length != 0) {
-          activeCasesList.add(totalCases[x].innerHtml.trim());
-        } else {
-          activeCasesList.add('NONE');
-        }
-      }
-      // adds to seriousCriticalList
-      else if (x % 10 == 7) {
-        if (totalCases[x].innerHtml.trim().length != 0) {
-          seriousCriticalList.add(totalCases[x].innerHtml.trim());
-        } else {
-          seriousCriticalList.add('NONE');
-        }
+        t.forEach((t) {});
       }
     }
+
+    print(countriesList);
+    print(totalCasesList);
+    print(newCasesList);
+    print(totalDeathsList);
+    print(newDeathsList);
+    print(totalRecovered);
+    print(activeCasesList);
+    print(seriousCriticalList);
 
     // more info load data
     List<dom.Element> totalsCDR = document
@@ -221,6 +247,15 @@ class _MyHomePageState extends State<MyHomePage> {
       date = DateTime.now();
       loadListLength = 5;
     });
+  }
+
+  _launchURL() async {
+    const url = 'https://flutter.dev';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   _removeLastRecord() {
@@ -338,17 +373,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Lato-Regular',
                 fontSize: 15,
-                color: Colors.cyanAccent,
+                color: eggShell,
               ),
             ),
           ],
         ),
         centerTitle: true,
-        backgroundColor: Color(0xff1d2c4d),
+        backgroundColor: yankeesBlue,
       ),
       drawer: Drawer(
         child: Container(
-          color: Color(0xff1C2844),
+          color: yankeesBlue,
           child: Column(
             children: <Widget>[
               Container(
@@ -356,9 +391,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 height: 200,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                     colors: [
-                      Color(0xff0B1836),
-                      Color(0xff000F30),
+                      eerieBlack,
+                      yankeesBlue,
                     ],
                   ),
                 ),
@@ -384,9 +421,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         '${country.length} \nAffected Areas',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.yellow,
-                          fontFamily: 'Lato-Bold',
-                          fontSize: 20,
+                          color: eggShell,
+                          fontFamily: 'Lato-Black',
+                          fontSize: 15,
                         ),
                       ),
                       SizedBox(
@@ -397,6 +434,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         style: TextStyle(
                           color: Colors.white,
                           fontFamily: 'Lato-Regular',
+                          fontSize: 10.0,
                         ),
                       ),
                     ],
@@ -404,26 +442,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               MaterialButton(
-                color: Color(0xff374972),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LatestUpdates(),
-                  ),
-                ),
-                child: ListTile(
-                  title: Text(
-                    'Latest Updates',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Lato-Regular',
-                    ),
-                  ),
-                  leading: Icon(Icons.assessment, color: Colors.orangeAccent),
-                ),
-              ),
-              MaterialButton(
-                color: Color(0xff374972),
+                color: eerieBlack,
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -440,16 +459,35 @@ class _MyHomePageState extends State<MyHomePage> {
                           color: Colors.redAccent[100],
                         ),
                   title: Text(
-                    '${loading ? 'Loading' : 'More'} Information',
+                    '${loading ? 'Loading' : 'World'} Totals',
                     style: TextStyle(
                       color: Colors.white,
-                      fontFamily: 'Lato-Regular',
+                      fontFamily: 'Lato-Bold',
                     ),
                   ),
                 ),
               ),
               MaterialButton(
-                color: Color(0xff374972),
+                color: eerieBlack,
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LatestUpdates(),
+                  ),
+                ),
+                child: ListTile(
+                  title: Text(
+                    'Latest Updates',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Lato-Bold',
+                    ),
+                  ),
+                  leading: Icon(Icons.assessment, color: Colors.orangeAccent),
+                ),
+              ),
+              MaterialButton(
+                color: eerieBlack,
                 onPressed: () => !showMapLoading
                     ? null
                     : Navigator.push(
@@ -472,7 +510,36 @@ class _MyHomePageState extends State<MyHomePage> {
                     'Open Maps',
                     style: TextStyle(
                       color: Colors.white,
-                      fontFamily: 'Lato-Regular',
+                      fontFamily: 'Lato-Bold',
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(child: SizedBox()),
+              MaterialButton(
+                color: Color(0xff401515),
+                onPressed: () => !showMapLoading
+                    ? null
+                    : Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MapsCorona(
+                            country: country,
+                            markers: markers,
+                          ),
+                        ),
+                      ),
+                child: ListTile(
+                  leading: Icon(
+                    FontAwesomeIcons.coffee,
+                    color: Colors.redAccent[100],
+                  ),
+                  title: Text(
+                    'Coffee',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Lato-Bold',
+                      fontSize: 17,
                     ),
                   ),
                 ),
@@ -485,12 +552,12 @@ class _MyHomePageState extends State<MyHomePage> {
           ? null
           : FloatingActionButton(
               onPressed: getCountries,
-              backgroundColor: Color(0xff375087),
+              backgroundColor: yankeesBlue,
               child: Icon(
                 Icons.refresh,
               ),
             ),
-      backgroundColor: Color(0xff375087),
+      backgroundColor: eerieBlack,
       body: loading
           ? Center(
               child: Column(
@@ -526,13 +593,16 @@ class _MyHomePageState extends State<MyHomePage> {
                         controller: textController,
                         style: TextStyle(
                           color: Colors.white,
-                          fontFamily: 'Lato-Regular',
+                          fontFamily: 'Lato-Bold',
+                          fontSize: 15.0,
                         ),
                         decoration: InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(vertical: 10.0),
                           suffixIcon: IconButton(
                             icon: Icon(
                               Icons.backspace,
                               color: Colors.grey[200],
+                              size: 20,
                             ),
                             tooltip: 'Clear',
                             onPressed: () {
@@ -542,13 +612,15 @@ class _MyHomePageState extends State<MyHomePage> {
                           prefixIcon: Icon(
                             Icons.search,
                             color: Colors.white,
+                            size: 20,
                           ),
                           filled: true,
-                          fillColor: Color(0xff1d2c4d),
+                          fillColor: shadowBlue,
                           hintText: 'Search a country',
                           hintStyle: TextStyle(
                             color: Colors.white,
-                            fontFamily: 'Lato-Regular',
+                            fontFamily: 'Lato-Bold',
+                            fontSize: 15.0,
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(5),
@@ -565,7 +637,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       Text(
                         'As of ${DateFormat('yMMMMd').add_jm().format(date)}',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: eggShell,
                           fontFamily: 'Lato-Black',
                         ),
                       ),
@@ -628,7 +700,7 @@ class DataWidget extends StatelessWidget {
       ),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Color(0xff1d2c4d),
+        color: yankeesBlue,
         borderRadius: BorderRadius.circular(5),
         boxShadow: [
           BoxShadow(

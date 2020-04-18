@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:coronatracker/constants/constants.dart';
 import 'package:coronatracker/models/results.dart';
 import 'package:coronatracker/widgets/active_cases.dart';
 import 'package:coronatracker/widgets/total_cases.dart';
@@ -96,7 +97,7 @@ class _MapsCoronaState extends State<MapsCorona> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: Color(0xff102044),
+        backgroundColor: yankeesBlue,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
@@ -111,7 +112,7 @@ class _MapsCoronaState extends State<MapsCorona> {
         ),
       ),
       body: Container(
-        color: Color(0xff343332),
+        color: yankeesBlue,
         child: loading
             ? Center(
                 child: CircularProgressIndicator(),
@@ -227,7 +228,7 @@ class _MapsCoronaState extends State<MapsCorona> {
                     flex: 2,
                     child: Container(
                       width: double.infinity,
-                      color: Color(0xff000D29),
+                      color: yankeesBlue,
                       child: !didTap
                           ? Column(
                               mainAxisAlignment: MainAxisAlignment.center,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:coronatracker/constants/constants.dart';
 
 class TotalDeaths extends StatelessWidget {
   final String data;
@@ -26,7 +27,7 @@ class TotalDeaths extends StatelessWidget {
           vertical: 15.0,
         ),
         decoration: BoxDecoration(
-          color: Color(0xff131C2F),
+          color: eerieBlack,
           borderRadius: BorderRadius.circular(5),
           boxShadow: [
             BoxShadow(
